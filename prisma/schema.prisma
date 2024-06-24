@@ -12,3 +12,219 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Akun {
+  id            String        @id @default(uuid())
+  username      String        @unique @db.VarChar(100)
+  password      String        @db.VarChar(100)
+  createdAt     DateTime      @default(now())
+
+  Panitia       Panitia?
+  Mentee        Mentee?
+  Sponsor       Sponsor?
+  Pembicara     Pembicara?
+
+  @@map("akun")
+}
+
+model Panitia {
+  @@map("panitia")
+
+  username      String        @id
+  nama          String        @db.VarChar(100)
+  fakultas      String        @db.VarChar(50)
+  jurusan       String        @db.VarChar(50)
+  angkatan      Int           @db.SmallInt
+  divisiPIId    String?       @unique
+  divisiBPHId   String?
+  jabatan       TipeJabatan   @default(STAFF)
+
+  hadirRapatBPH PanitiaRapatBPH[]
+
+  kelompokOKK   KelompokOKK?
+  
+  akun          Akun          @relation(fields: [username], references: [username])
+  divisiPI      DivisiPI?     @relation(fields: [divisiPIId], references: [id])
+  divisiBPH     DivisiBPH?    @relation(fields: [divisiBPHId], references: [id])
+}
+
+enum TipeJabatan {
+  @@map("tipe_jabatan")
+  PENGURUS_INTI
+
+  PJ
+  WA_PJ1
+  WA_PJ2
+  STAFF
+}
+
+model DivisiPI {
+  @@map("divisi_PI")
+
+  id            String        @id @default(uuid())
+  nama          String        @unique @db.VarChar(50)
+  pengurus      Panitia?
+}
+
+model DivisiBPH {
+  @@map("divisi_bph")
+
+  id            String        @id @default(uuid())
+  nama          String        @unique @db.VarChar(50)
+  Panitia       Panitia[]
+  RapatBPH      RapatBPH[]
+}
+
+model RapatBPH {
+  @@map("rapat_bph")
+
+  waktu         DateTime      @db.Timestamp()
+  tempat        String        @db.VarChar(255)
+  kesimpulan    String        @db.Text
+  divisiBPHId   String
+  panitiaHadir  PanitiaRapatBPH[]
+
+  @@id([divisiBPHId, waktu])
+  divisiBPH     DivisiBPH     @relation(fields: [divisiBPHId], references: [id])
+}
+
+model PanitiaRapatBPH {
+  @@map("panitia_rapat_bph")
+
+  panitiaUsername     String   @db.VarChar(100)
+  waktuHadir          DateTime @db.Timestamp()
+  rapatBPHWaktu       DateTime @db.Timestamp()
+  rapatBPHDivisiBPHId String 
+
+  panitia        Panitia  @relation(fields: [panitiaUsername], references: [username])
+  rapatBPH       RapatBPH @relation(fields: [rapatBPHWaktu, rapatBPHDivisiBPHId], references: [waktu, divisiBPHId])
+
+  @@id([panitiaUsername, rapatBPHWaktu, rapatBPHDivisiBPHId])
+}
+
+model KelompokOKK {
+  @@map("kelompok_okk")
+
+  id              String        @id @default(uuid())
+  no              Int           @unique @db.SmallInt
+  anggota         Mentee[]
+
+  usernameMentor  String        @unique
+  mentoring       Mentoring[]
+
+  mentor          Panitia       @relation(fields: [usernameMentor], references: [username])
+}
+
+model Mentee {
+  @@map("mentee")
+
+  username      String        @id @default(uuid())
+  nama          String        @db.VarChar(100)
+  fakultas      String        @db.VarChar(50)
+  jurusan       String        @db.VarChar(50)
+  angkatan      Int           @db.SmallInt
+  noKelompokOKK Int           @db.SmallInt
+
+  hadirMentoring MenteeMentoring[]
+
+  akun          Akun          @relation(fields: [username], references: [username])
+  kelompokOKK   KelompokOKK   @relation(fields: [noKelompokOKK], references: [no])
+}
+
+model Mentoring {
+  @@map("mentoring")
+
+  waktu         DateTime      @db.Timestamp()
+  tempat        String        @db.VarChar(255)
+  materi        String        @db.Text
+  noKelompokOKK Int           @db.SmallInt
+  menteeHadir   MenteeMentoring[]
+  kelompokOKK   KelompokOKK   @relation(fields: [noKelompokOKK], references: [no])
+
+  @@id([noKelompokOKK, waktu])
+}
+
+model MenteeMentoring {
+  @@map("mentee_mentoring")
+
+  menteeUsername  String   @db.VarChar(100)
+  waktuHadir      DateTime @db.Timestamp()
+  mentoringWaktu  DateTime @db.Timestamp()
+  mentoringNoKelompokOKK Int
+
+  mentee        Mentee    @relation(fields: [menteeUsername], references: [username])
+  mentoring     Mentoring @relation(fields: [mentoringWaktu, mentoringNoKelompokOKK], references: [waktu, noKelompokOKK])
+
+  @@id([menteeUsername, mentoringWaktu, mentoringNoKelompokOKK])
+}
+
+model Acara {
+  @@map("acara")
+
+  id           String        @id @default(uuid())
+  nama         String        @db.VarChar(100)
+  waktuMulai   DateTime      @db.Timestamp()
+  waktuSelesai DateTime      @db.Timestamp()
+  tempat       String        @db.VarChar(255)
+  tanggal      DateTime      @db.Date()
+
+  sponsor      AcaraSponsor[]
+  pembicara    AcaraPembicara[]
+}
+
+model Sponsor {
+  @@map("sponsor")
+
+  username     String        @id @db.VarChar(100)
+  nama         String        @db.VarChar(255)
+  kontak       String        @db.VarChar(100)
+
+  acara        AcaraSponsor[]
+
+  akun         Akun          @relation(fields: [username], references: [username])
+}
+
+model AcaraSponsor {
+  @@map("acara_sponsor")
+
+  acaraId      String
+  sponsorId    String   @db.VarChar(100)
+  paket        PaketSponsor   
+
+  acara        Acara    @relation(fields: [acaraId], references: [id])
+  sponsor      Sponsor  @relation(fields: [sponsorId], references: [username])
+
+  @@id([acaraId, sponsorId])
+}
+
+enum PaketSponsor {
+  @@map("paket_sponsor")
+
+  GOLD
+  SILVER
+  BRONZE
+}
+
+model Pembicara {
+  @@map("pembicara")
+
+  username     String        @id @db.VarChar(100)
+  nama         String        @db.VarChar(255)
+  kontak       String        @db.VarChar(100)
+
+  acara        AcaraPembicara[]
+
+  akun         Akun          @relation(fields: [username], references: [username])
+}
+
+model AcaraPembicara {
+  @@map("acara_pembicara")
+
+  acaraId      String     
+  pembicaraId  String    @db.VarChar(100)
+
+  acara        Acara     @relation(fields: [acaraId], references: [id])
+  pembicara    Pembicara @relation(fields: [pembicaraId], references: [username])
+
+  @@id([acaraId, pembicaraId])
+}
