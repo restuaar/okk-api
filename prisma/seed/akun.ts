@@ -1,25 +1,27 @@
 import { PrismaClient } from '@prisma/client';
 import { hash } from 'bcrypt';
-import { faker } from '@faker-js/faker';
+import { fakerID_ID } from '@faker-js/faker';
 import { v6 as uuidv6 } from 'uuid';
 
 const prisma = new PrismaClient();
 const ROUND_OF_SALT = 10;
-const USER_NUMBER = 10;
+const USER_NUMBER = 100;
 
 interface AkunSeed {
   id: string;
   username: string;
   password: string;
+  nama: string;
 }
 
-async function createRandomUser(): Promise<AkunSeed> {
+const createRandomUser = async (): Promise<AkunSeed> => {
   return {
     id: uuidv6(),
-    username: faker.internet.email(),
-    password: await hash(faker.internet.password(), ROUND_OF_SALT),
+    username: fakerID_ID.internet.email(),
+    password: await hash(fakerID_ID.internet.password(), ROUND_OF_SALT),
+    nama: fakerID_ID.person.fullName(),
   };
-}
+};
 
 async function main() {
   console.log('Menjalankan seed akun...');
@@ -30,11 +32,7 @@ async function main() {
     return await prisma.akun.upsert({
       where: { username: user.username },
       update: {},
-      create: {
-        id: user.id,
-        username: user.username,
-        password: user.password,
-      },
+      create: user,
     });
   });
 
