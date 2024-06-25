@@ -64,6 +64,8 @@ model DivisiPI {
   id            String        @id @default(uuid())
   nama          String        @unique @db.VarChar(50)
   pengurus      Panitia?
+
+  divisiKoor    DivisiBPH[]
 }
 
 model DivisiBPH {
@@ -71,8 +73,11 @@ model DivisiBPH {
 
   id            String        @id @default(uuid())
   nama          String        @unique @db.VarChar(50)
-  Panitia       Panitia[]
-  RapatBPH      RapatBPH[]
+  divisiBagian  String        
+  panitia       Panitia[]
+  rapatBPH      RapatBPH[]
+
+  divisiPI      DivisiPI?      @relation(fields: [divisiBagian], references: [nama])
 }
 
 model RapatBPH {

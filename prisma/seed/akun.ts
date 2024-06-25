@@ -23,21 +23,31 @@ const createRandomUser = async (): Promise<AkunSeed> => {
   };
 };
 
-async function main() {
+async function main(): Promise<void> {
   console.log('Menjalankan seed akun...');
   console.log('Menghapus data akun lama...');
   await prisma.akun.deleteMany();
-  const users = Array.from({ length: USER_NUMBER }, async () => {
+
+  const userPromises = Array.from({ length: USER_NUMBER }, async () => {
     const user = await createRandomUser();
-    return await prisma.akun.upsert({
+    return prisma.akun.upsert({
       where: { username: user.username },
       update: {},
       create: user,
     });
   });
 
-  const resultUser = await Promise.all(users);
-  console.log(resultUser);
+  await Promise.all(userPromises);
+
+  // Akun untuk testing
+  await prisma.akun.create({
+    data: {
+      id: uuidv6(),
+      username: 'restuaar',
+      password: await hash('restuaar', ROUND_OF_SALT),
+      nama: 'Restu Ahmad Ar Ridho',
+    },
+  });
   console.log('Seed akun berhasil!');
 }
 

@@ -4,10 +4,16 @@ const prisma = new PrismaClient();
 
 async function main() {
   console.log('Menjalankan seed remove...');
-  console.log('Menghapus data panitia lama...');
-  await prisma.panitia.deleteMany();
+
+  console.log('Menghapus data divisi BPH lama...');
+  await prisma.divisiBPH.deleteMany();
+
+  console.log('Menghapus data divisi PI lama...');
+  await prisma.divisiPI.deleteMany();
+
   console.log('Menghapus data akun lama...');
   await prisma.akun.deleteMany();
+
   console.log('Seed remove berhasil!');
 }
 
