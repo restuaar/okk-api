@@ -2,24 +2,24 @@ import { PrismaClient } from '@prisma/client';
 import { hash } from 'bcrypt';
 import { fakerID_ID } from '@faker-js/faker';
 import { v6 as uuidv6 } from 'uuid';
+import { AkunSeed } from './utils/interface';
+import { ROUND_OF_SALT, USER_NUMBER } from './utils/constant';
 
 const prisma = new PrismaClient();
-const ROUND_OF_SALT = 10;
-const USER_NUMBER = 100;
-
-interface AkunSeed {
-  id: string;
-  username: string;
-  password: string;
-  nama: string;
-}
 
 const createRandomUser = async (): Promise<AkunSeed> => {
+  const namaDepan = fakerID_ID.person.firstName();
+  const namaBelakang = fakerID_ID.person.lastName();
   return {
     id: uuidv6(),
-    username: fakerID_ID.internet.email(),
+    username: fakerID_ID.internet
+      .userName({
+        firstName: namaDepan,
+        lastName: namaBelakang,
+      })
+      .toLowerCase(),
     password: await hash(fakerID_ID.internet.password(), ROUND_OF_SALT),
-    nama: fakerID_ID.person.fullName(),
+    nama: `${namaDepan} ${namaBelakang}`,
   };
 };
 

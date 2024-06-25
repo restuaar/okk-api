@@ -20,7 +20,10 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "seed:akun": "ts-node ./prisma/seed/akun.ts",
     "seed:divisi": "ts-node ./prisma/seed/divisi.ts",
-    "seed:remove": "ts-node ./prisma/seed/remove.ts"
+    "seed:panitia": "ts-node ./prisma/seed/panitia.ts",
+    "seed:remove": "ts-node ./prisma/seed/remove.ts",
+    "seed:all": "npm-run-all seed:remove seed:akun seed:divisi seed:panitia",
+    "seed:test": "ts-node ./prisma/seed/test.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
@@ -55,6 +58,7 @@
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.0",
     "jest": "^29.5.0",
+    "npm-run-all": "^4.1.5",
     "prettier": "^3.0.0",
     "prisma": "^5.15.1",
     "source-map-support": "^0.5.21",
