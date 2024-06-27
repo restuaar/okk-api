@@ -69,8 +69,9 @@ async function main() {
     console.log(`Menambahkan data panitia BPH ${divisi}...`);
 
     const panitiaBPHPromises = [];
-    const dataRandom = getRandomFakultasJurusanAngkatan();
+
     for (let i = 0; i < ANGGOTA_PER_DIVISI; i++) {
+      const dataRandom = getRandomFakultasJurusanAngkatan();
       panitiaBPHPromises.push(
         await prisma.panitia.upsert({
           where: { username: dataAkunBPH[i].username },
