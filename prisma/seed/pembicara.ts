@@ -39,9 +39,9 @@ async function main() {
     const randomBanyakPembicara = getRandomInt(3, 1);
     const pembicaraIndex = [];
     for (let i = 0; i < randomBanyakPembicara; i++) {
-      let randomPembicaraIndex = getRandomInt(BANYAK_PEMBICARA - 1, 0);
+      let randomPembicaraIndex = getRandomInt(BANYAK_PEMBICARA - 1);
       while (pembicaraIndex.includes(randomPembicaraIndex)) {
-        randomPembicaraIndex = getRandomInt(BANYAK_PEMBICARA - 1, 0);
+        randomPembicaraIndex = getRandomInt(BANYAK_PEMBICARA - 1);
       }
       pembicaraIndex.push(randomPembicaraIndex);
       const pembicara = dataAkunPembicara[randomPembicaraIndex];

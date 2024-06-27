@@ -235,3 +235,40 @@ export const ACARA: Acara[] = [
 ];
 
 export const BANYAK_ACARA = ACARA.length;
+
+export const TEMPAT = [
+  'Gedung Rektorat UI',
+  'Aula Barat UI',
+  'Auditorium FEUI',
+  'Perpustakaan Pusat UI',
+  'Lapangan Sepak Bola UI',
+  'Balairung UI',
+  'Pusat Kegiatan Mahasiswa (Pusgiwa)',
+  'Kantin Fakultas Ilmu Pengetahuan Budaya',
+  'Ruangan Seminar Fakultas Teknik',
+  'Gedung Dekanat Fakultas Kedokteran',
+  'Laboratorium Komputer Fasilkom UI',
+  'Ruang Diskusi FIB UI',
+  'Online (Zoom)',
+  'Online (Google Meet)',
+];
+
+export const BANYAK_RAPAT_BPH = 10;
+
+export const MENTORING_MATERI = [
+  'Pengenalan Lingkungan Kampus',
+  'Etika dan Tata Krama',
+  'Pengenalan Sistem Akademik Universitas',
+  'Pengenalan Fasilitas Kampus',
+  'Tips Belajar Efektif',
+  'Adaptasi ke Hidup Kampus',
+  'Pentingnya Kegiatan Ekstrakurikuler',
+  'Pembelajaran Berbasis Proyek',
+  'Aspek Kesehatan Mahasiswa',
+  'Pengembangan Soft Skills',
+  'Pengenalan Karir dan Magang',
+  'Kesadaran Lingkungan dan Keberlanjutan',
+  'Pentingnya Keseimbangan Kehidupan',
+];
+
+export const MENTORING_PER_KELOMPOK = 2;

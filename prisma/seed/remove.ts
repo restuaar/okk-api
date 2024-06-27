@@ -5,6 +5,14 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Menjalankan seed remove...');
 
+  console.log('Menghapus data mentoring lama...');
+  await prisma.menteeMentoring.deleteMany();
+  await prisma.mentoring.deleteMany();
+
+  console.log('Menghapus data kehadiran rapat BPH lama...');
+  await prisma.panitiaRapatBPH.deleteMany();
+  await prisma.rapatBPH.deleteMany();
+
   console.log('Menghapus data pembicara lama...');
   await prisma.acaraPembicara.deleteMany();
   await prisma.pembicara.deleteMany();

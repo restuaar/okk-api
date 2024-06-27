@@ -1,5 +1,11 @@
 import { PaketSponsor, TipeJabatan } from '@prisma/client';
-import { ANGKATAN, FAKULTAS_UI, ROUND_OF_SALT } from './constant';
+import {
+  ANGKATAN,
+  FAKULTAS_UI,
+  MENTORING_MATERI,
+  ROUND_OF_SALT,
+  TEMPAT,
+} from './constant';
 import { faker, fakerID_ID } from '@faker-js/faker';
 import { AkunSeed } from './interface';
 import { hash } from 'bcrypt';
@@ -73,4 +79,29 @@ export const usernameFromCompany = (company: string) => {
 
 export const getRandomKontak = () => {
   return fakerID_ID.phone.number().replace(/[-\s]/g, '').replace('(+62)', '0');
+};
+
+export const getRandomKalimat = () => {
+  return fakerID_ID.lorem.sentence({
+    min: 10,
+    max: 20,
+  });
+};
+
+export const getRandomWaktu = (refDate: Date = faker.date.soon()) => {
+  if (refDate) {
+    const toTime = new Date(refDate);
+    toTime.setMinutes(toTime.getMinutes() + 30);
+
+    return faker.date.between({ from: refDate, to: toTime });
+  }
+  return refDate;
+};
+
+export const getRandomTempat = () => {
+  return TEMPAT[getRandomInt(TEMPAT.length - 1)];
+};
+
+export const getRandomMateri = () => {
+  return MENTORING_MATERI[getRandomInt(MENTORING_MATERI.length - 1)];
 };

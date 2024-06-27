@@ -64,9 +64,9 @@ async function main() {
     const sponsorIndex = [];
 
     for (let i = 0; i < randomBanyakSponsor; i++) {
-      let randomSponsorIndex = getRandomInt(BANYAK_SPONSOR - 1, 0);
+      let randomSponsorIndex = getRandomInt(BANYAK_SPONSOR - 1);
       while (sponsorIndex.includes(randomSponsorIndex)) {
-        randomSponsorIndex = getRandomInt(BANYAK_SPONSOR - 1, 0);
+        randomSponsorIndex = getRandomInt(BANYAK_SPONSOR - 1);
       }
       sponsorIndex.push(randomSponsorIndex);
       const sponsor = dataAkunSponsor[randomSponsorIndex];

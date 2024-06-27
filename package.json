@@ -27,7 +27,9 @@
     "seed:acara": "ts-node ./prisma/seed/acara.ts",
     "seed:pembicara": "ts-node ./prisma/seed/pembicara.ts",
     "seed:sponsor": "ts-node ./prisma/seed/sponsor.ts",
-    "seed:all": "npm-run-all seed:remove seed:akun seed:divisi seed:panitia seed:kelompok-okk seed:mentee seed:acara seed:pembicara seed:sponsor",
+    "seed:rapat-bph": "ts-node ./prisma/seed/rapat-bph.ts",
+    "seed:mentoring": "ts-node ./prisma/seed/mentoring.ts",
+    "seed:all": "npm-run-all seed:remove seed:akun seed:divisi seed:panitia seed:kelompok-okk seed:mentee seed:acara seed:pembicara seed:sponsor seed:rapat-bph seed:mentoring",
     "seed:test": "ts-node ./prisma/seed/test.ts"
   },
   "dependencies": {
