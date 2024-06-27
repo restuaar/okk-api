@@ -40,7 +40,7 @@ async function main() {
   });
   Promise.all(divisiBPHPromise);
 
-  console.log('Seed divisi berhasil!');
+  console.log('Seed divisi berhasil dijalankan!');
 }
 
 main()

@@ -170,7 +170,7 @@ model Acara {
   waktuMulai   DateTime      @db.Timestamp()
   waktuSelesai DateTime      @db.Timestamp()
   tempat       String        @db.VarChar(255)
-  tanggal      DateTime      @db.Date()
+  deskripsi    String
 
   sponsor      AcaraSponsor[]
   pembicara    AcaraPembicara[]

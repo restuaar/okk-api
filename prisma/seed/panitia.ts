@@ -91,7 +91,7 @@ async function main() {
     await Promise.all(panitiaBPHPromises);
   }
 
-  console.log('Seed panitia berhasil!');
+  console.log('Seed panitia berhasil dijalankan!');
 }
 
 main()

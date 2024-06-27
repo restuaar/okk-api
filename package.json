@@ -18,11 +18,16 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
+    "seed:remove": "ts-node ./prisma/seed/remove.ts",
     "seed:akun": "ts-node ./prisma/seed/akun.ts",
     "seed:divisi": "ts-node ./prisma/seed/divisi.ts",
     "seed:panitia": "ts-node ./prisma/seed/panitia.ts",
-    "seed:remove": "ts-node ./prisma/seed/remove.ts",
-    "seed:all": "npm-run-all seed:remove seed:akun seed:divisi seed:panitia",
+    "seed:kelompok-okk": "ts-node ./prisma/seed/kelompok-okk.ts",
+    "seed:mentee": "ts-node ./prisma/seed/mentee.ts",
+    "seed:acara": "ts-node ./prisma/seed/acara.ts",
+    "seed:pembicara": "ts-node ./prisma/seed/pembicara.ts",
+    "seed:sponsor": "ts-node ./prisma/seed/sponsor.ts",
+    "seed:all": "npm-run-all seed:remove seed:akun seed:divisi seed:panitia seed:kelompok-okk seed:mentee seed:acara seed:pembicara seed:sponsor",
     "seed:test": "ts-node ./prisma/seed/test.ts"
   },
   "dependencies": {
