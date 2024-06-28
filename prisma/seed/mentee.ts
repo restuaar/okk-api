@@ -21,28 +21,22 @@ async function main() {
     take: MENTEE_PER_KELOMPOK * dataKelompok.length,
   });
 
-  const menteePromises = [];
-
-  for (let i = 0; i < dataAkunMentee.length; i++) {
-    const kelompokIndex = Math.floor(i / MENTEE_PER_KELOMPOK);
-    const kelompok = dataKelompok[kelompokIndex];
-
+  const menteePromises = dataAkunMentee.map((akun, index) => {
+    const kelompok = dataKelompok[Math.floor(index / MENTEE_PER_KELOMPOK)];
     const dataRandom = getRandomFakultasJurusanAngkatan();
 
-    menteePromises.push(
-      await prisma.mentee.upsert({
-        where: { username: dataAkunMentee[i].username },
-        update: {},
-        create: {
-          username: dataAkunMentee[i].username,
-          fakultas: dataRandom.fakultas,
-          jurusan: dataRandom.jurusan,
-          angkatan: dataRandom.angkatan,
-          noKelompokOKK: kelompok.no,
-        },
-      }),
-    );
-  }
+    return prisma.mentee.upsert({
+      where: { username: akun.username },
+      update: {},
+      create: {
+        username: akun.username,
+        fakultas: dataRandom.fakultas,
+        jurusan: dataRandom.jurusan,
+        angkatan: dataRandom.angkatan,
+        noKelompokOKK: kelompok.no,
+      },
+    });
+  });
 
   await Promise.all(menteePromises);
 

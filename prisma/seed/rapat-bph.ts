@@ -20,12 +20,12 @@ async function main() {
 
   const divisiBPH = await prisma.divisiBPH.findMany();
 
-  const rapatBPHPromises = [];
-  for (let i = 0; i < BANYAK_RAPAT_BPH; i++) {
-    const divisi = divisiBPH[getRandomInt(divisiBPH.length - 1)];
-    const waktu = getRandomWaktu();
-    rapatBPHPromises.push(
-      await prisma.rapatBPH.upsert({
+  const rapatBPHPromises = Array.from(
+    { length: BANYAK_RAPAT_BPH },
+    async () => {
+      const divisi = divisiBPH[getRandomInt(divisiBPH.length - 1)];
+      const waktu = getRandomWaktu();
+      return prisma.rapatBPH.upsert({
         where: {
           divisiBPHId_waktu: {
             divisiBPHId: divisi.id,
@@ -39,40 +39,42 @@ async function main() {
           kesimpulan: getRandomKalimat(),
           divisiBPHId: divisi.id,
         },
-      }),
-    );
+      });
+    },
+  );
 
-    const panitia = await prisma.panitia.findMany({
+  const rapatBPH = await Promise.all(rapatBPHPromises);
+
+  console.log('Menjalankan seed anggota rapat BPH...');
+
+  const panitiaRapatPromises = rapatBPH.map(async (rapat) => {
+    const panitiaDivisi = await prisma.panitia.findMany({
       where: {
-        divisiBPHId: divisi.id,
+        divisiBPHId: rapat.divisiBPHId,
       },
     });
 
-    const kehadiranRapatBPHPromises = [];
-    for (let j = 0; j < panitia.length; j++) {
-      kehadiranRapatBPHPromises.push(
-        await prisma.panitiaRapatBPH.upsert({
-          where: {
-            panitiaUsername_rapatBPHWaktu_rapatBPHDivisiBPHId: {
-              panitiaUsername: panitia[j].username,
-              rapatBPHWaktu: waktu,
-              rapatBPHDivisiBPHId: divisi.id,
-            },
+    return panitiaDivisi.map((panitia) => {
+      return prisma.panitiaRapatBPH.upsert({
+        where: {
+          panitiaUsername_rapatBPHWaktu_rapatBPHDivisiBPHId: {
+            panitiaUsername: panitia.username,
+            rapatBPHWaktu: rapat.waktu,
+            rapatBPHDivisiBPHId: rapat.divisiBPHId,
           },
-          update: {},
-          create: {
-            panitiaUsername: panitia[j].username,
-            waktuHadir: getRandomWaktu(waktu),
-            rapatBPHWaktu: waktu,
-            rapatBPHDivisiBPHId: divisi.id,
-          },
-        }),
-      );
-    }
-    await Promise.all(kehadiranRapatBPHPromises);
-  }
+        },
+        update: {},
+        create: {
+          panitiaUsername: panitia.username,
+          waktuHadir: getRandomWaktu(rapat.waktu),
+          rapatBPHWaktu: rapat.waktu,
+          rapatBPHDivisiBPHId: rapat.divisiBPHId,
+        },
+      });
+    });
+  });
 
-  await Promise.all(rapatBPHPromises);
+  await Promise.all(panitiaRapatPromises);
 
   console.log('Seed rapat BPH berhasil dijalankan!');
 }

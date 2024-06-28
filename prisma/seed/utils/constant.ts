@@ -10,7 +10,11 @@ export const MENTEE_PER_KELOMPOK = 10;
 
 export const BANYAK_PEMBICARA = 10;
 
+export const PEMBICARA_PER_ACARA = 4;
+
 export const BANYAK_SPONSOR = 5;
+
+export const SPONSOR_PER_ACARA = 4;
 
 export const AKUN_KOSONG = [
   {
@@ -233,8 +237,6 @@ export const ACARA: Acara[] = [
       'Acara penutupan OKK UI dengan berbagai penampilan seni, pemberian penghargaan, dan pesan dari pimpinan universitas.',
   },
 ];
-
-export const BANYAK_ACARA = ACARA.length;
 
 export const TEMPAT = [
   'Gedung Rektorat UI',

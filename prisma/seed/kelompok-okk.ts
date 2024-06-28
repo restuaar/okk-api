@@ -19,20 +19,17 @@ async function main() {
     },
   });
 
-  const kelompokOKKPromises = [];
-  for (let i = 1; i <= mentors.length; i++) {
-    kelompokOKKPromises.push(
-      await prisma.kelompokOKK.upsert({
-        where: { no: i },
-        update: {},
-        create: {
-          id: uuidv6(),
-          no: i,
-          usernameMentor: mentors[i - 1].username,
-        },
-      }),
-    );
-  }
+  const kelompokOKKPromises = mentors.map((mentor, index) => {
+    return prisma.kelompokOKK.upsert({
+      where: { no: index + 1 },
+      update: {},
+      create: {
+        id: uuidv6(),
+        no: index + 1,
+        usernameMentor: mentor.username,
+      },
+    });
+  });
 
   await Promise.all(kelompokOKKPromises);
 

@@ -11,12 +11,13 @@ async function main() {
   await prisma.divisiPI.deleteMany();
 
   console.log('Menambahkan data divisi PI...');
-  const divisiPIPromises = DIVISI.map(async (divisi) => {
-    return await prisma.divisiPI.upsert({
-      where: { nama: divisi.divisiPI },
+  const divisiPIPromises = DIVISI.map((divisi) => {
+    const uuid = uuidv6();
+    return prisma.divisiPI.upsert({
+      where: { id: uuid },
       update: {},
       create: {
-        id: uuidv6(),
+        id: uuid,
         nama: divisi.divisiPI,
       },
     });
@@ -26,19 +27,21 @@ async function main() {
 
   console.log('Menambahkan data divisi BPH...');
   const divisiBPHPromise = DIVISI.map((divisi) => {
-    divisi.divisiBPH.map(async (bph) => {
-      return await prisma.divisiBPH.upsert({
-        where: { nama: bph },
+    return divisi.divisiBPH.map((bph) => {
+      const uuid = uuidv6();
+      return prisma.divisiBPH.upsert({
+        where: { id: uuid },
         update: {},
         create: {
-          id: uuidv6(),
+          id: uuid,
           nama: bph,
           divisiBagian: divisi.divisiPI,
         },
       });
     });
   });
-  Promise.all(divisiBPHPromise);
+
+  await Promise.all(divisiBPHPromise.map((promise) => Promise.all(promise)));
 
   console.log('Seed divisi berhasil dijalankan!');
 }

@@ -19,12 +19,10 @@ async function main() {
 
   const kelompokOKK = await prisma.kelompokOKK.findMany();
 
-  for (let i = 0; i < kelompokOKK.length; i++) {
-    const kelompok = kelompokOKK[i];
-    for (let i = 0; i < MENTORING_PER_KELOMPOK; i++) {
+  const mentoringPromises = kelompokOKK.map((kelompok) => {
+    return Array.from({ length: MENTORING_PER_KELOMPOK }, async () => {
       const waktu = getRandomWaktu();
-
-      await prisma.mentoring.upsert({
+      return prisma.mentoring.upsert({
         where: {
           noKelompokOKK_waktu: {
             noKelompokOKK: kelompok.no,
@@ -39,33 +37,45 @@ async function main() {
           noKelompokOKK: kelompok.no,
         },
       });
+    });
+  });
 
-      const mentees = await prisma.mentee.findMany({
-        where: {
-          noKelompokOKK: kelompok.no,
-        },
-      });
+  const mentoringPerKelompok = await Promise.all(
+    mentoringPromises.map((promise) => Promise.all(promise)),
+  );
 
-      for (let j = 0; j < mentees.length; j++) {
-        await prisma.menteeMentoring.upsert({
+  const mentoringMenteePromises = mentoringPerKelompok.map(
+    async (mentoringKelompok) => {
+      return mentoringKelompok.map(async (mentoring) => {
+        const mentee = await prisma.mentee.findMany({
           where: {
-            menteeUsername_mentoringWaktu_mentoringNoKelompokOKK: {
-              menteeUsername: mentees[j].username,
-              mentoringWaktu: waktu,
-              mentoringNoKelompokOKK: kelompok.no,
-            },
-          },
-          update: {},
-          create: {
-            menteeUsername: mentees[j].username,
-            waktuHadir: getRandomWaktu(waktu),
-            mentoringWaktu: waktu,
-            mentoringNoKelompokOKK: kelompok.no,
+            noKelompokOKK: mentoring.noKelompokOKK,
           },
         });
-      }
-    }
-  }
+
+        return mentee.map(async (mentee) => {
+          return prisma.menteeMentoring.upsert({
+            where: {
+              menteeUsername_mentoringWaktu_mentoringNoKelompokOKK: {
+                menteeUsername: mentee.username,
+                mentoringWaktu: mentoring.waktu,
+                mentoringNoKelompokOKK: mentoring.noKelompokOKK,
+              },
+            },
+            update: {},
+            create: {
+              menteeUsername: mentee.username,
+              waktuHadir: getRandomWaktu(mentoring.waktu),
+              mentoringWaktu: mentoring.waktu,
+              mentoringNoKelompokOKK: mentoring.noKelompokOKK,
+            },
+          });
+        });
+      });
+    },
+  );
+
+  await Promise.all(mentoringMenteePromises);
 
   console.log('Seed mentoring berhasil dijalankan!');
 }

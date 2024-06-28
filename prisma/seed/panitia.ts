@@ -1,14 +1,11 @@
 import { PrismaClient, TipeJabatan } from '@prisma/client';
-import { AKUN_KOSONG, ANGGOTA_PER_DIVISI, DIVISI } from './utils/constant';
+import { AKUN_KOSONG, ANGGOTA_PER_DIVISI } from './utils/constant';
 import {
   getJabatanByIndex,
   getRandomFakultasJurusanAngkatan,
 } from './utils/helper';
 
 const prisma = new PrismaClient();
-
-const divisiPI = DIVISI.map((divisi) => divisi.divisiPI);
-const divisiBPH = DIVISI.map((divisi) => divisi.divisiBPH).flat();
 
 async function main() {
   console.log('Menjalankan seed panitia...');
@@ -18,6 +15,8 @@ async function main() {
 
   console.log('Menambahkan data panitia PI...');
 
+  const divisiPI = await prisma.divisiPI.findMany();
+
   const dataAkunPI = await prisma.akun.findMany({
     where: {
       AND: AKUN_KOSONG,
@@ -25,71 +24,55 @@ async function main() {
     take: divisiPI.length,
   });
 
-  const panitiaPromises = divisiPI.map(async (divisi, index) => {
-    const idDivisi = (
-      await prisma.divisiPI.findUnique({
-        where: { nama: divisi },
-      })
-    ).id;
-
+  const panitiaPIPromises = dataAkunPI.map((akun, index) => {
     const dataRandom = getRandomFakultasJurusanAngkatan();
-
-    return await prisma.panitia.upsert({
-      where: { username: dataAkunPI[index].username },
+    return prisma.panitia.upsert({
+      where: { username: akun.username },
       update: {},
       create: {
-        username: dataAkunPI[index].username,
+        username: akun.username,
         fakultas: dataRandom.fakultas,
         jurusan: dataRandom.jurusan,
         angkatan: dataRandom.angkatan,
-        divisiPIId: idDivisi,
+        divisiPIId: divisiPI[index].id,
         jabatan: TipeJabatan.PENGURUS_INTI,
       },
     });
   });
 
-  await Promise.all(panitiaPromises);
+  await Promise.all(panitiaPIPromises);
 
   console.log('Menambahkan data panitia BPH...');
 
-  for (const divisi of divisiBPH) {
-    const dataAkunBPH = await prisma.akun.findMany({
-      where: {
-        AND: AKUN_KOSONG,
+  const divisiBPH = await prisma.divisiBPH.findMany();
+
+  const dataAkunBPH = await prisma.akun.findMany({
+    where: {
+      AND: AKUN_KOSONG,
+    },
+    take: divisiBPH.length * ANGGOTA_PER_DIVISI,
+  });
+
+  const panitiaBPHPromises = dataAkunBPH.map((akun, index) => {
+    const divisi = divisiBPH[Math.floor(index / ANGGOTA_PER_DIVISI)];
+
+    const dataRandom = getRandomFakultasJurusanAngkatan();
+
+    return prisma.panitia.upsert({
+      where: { username: akun.username },
+      update: {},
+      create: {
+        username: akun.username,
+        fakultas: dataRandom.fakultas,
+        jurusan: dataRandom.jurusan,
+        angkatan: dataRandom.angkatan,
+        divisiBPHId: divisi.id,
+        jabatan: getJabatanByIndex(index),
       },
-      take: ANGGOTA_PER_DIVISI, // anggota per divisi
     });
+  });
 
-    const idDivisi = (
-      await prisma.divisiBPH.findUnique({
-        where: { nama: divisi },
-      })
-    ).id;
-
-    console.log(`Menambahkan data panitia BPH ${divisi}...`);
-
-    const panitiaBPHPromises = [];
-
-    for (let i = 0; i < ANGGOTA_PER_DIVISI; i++) {
-      const dataRandom = getRandomFakultasJurusanAngkatan();
-      panitiaBPHPromises.push(
-        await prisma.panitia.upsert({
-          where: { username: dataAkunBPH[i].username },
-          update: {},
-          create: {
-            username: dataAkunBPH[i].username,
-            fakultas: dataRandom.fakultas,
-            jurusan: dataRandom.jurusan,
-            angkatan: dataRandom.angkatan,
-            divisiBPHId: idDivisi,
-            jabatan: getJabatanByIndex(i),
-          },
-        }),
-      );
-    }
-
-    await Promise.all(panitiaBPHPromises);
-  }
+  await Promise.all(panitiaBPHPromises);
 
   console.log('Seed panitia berhasil dijalankan!');
 }

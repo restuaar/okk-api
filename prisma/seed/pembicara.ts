@@ -1,5 +1,9 @@
 import { PrismaClient } from '@prisma/client';
-import { AKUN_KOSONG, BANYAK_PEMBICARA } from './utils/constant';
+import {
+  AKUN_KOSONG,
+  BANYAK_PEMBICARA,
+  PEMBICARA_PER_ACARA,
+} from './utils/constant';
 import { getRandomInt, getRandomKontak } from './utils/helper';
 
 const prisma = new PrismaClient();
@@ -23,7 +27,7 @@ async function main() {
   });
 
   const pembicaraPromises = dataAkunPembicara.map(async (akun) => {
-    return await prisma.pembicara.upsert({
+    return prisma.pembicara.upsert({
       where: { username: akun.username },
       update: {},
       create: {
@@ -35,10 +39,11 @@ async function main() {
 
   await Promise.all(pembicaraPromises);
 
-  const acaraPembicaraPromises = acara.map(async (acara) => {
-    const randomBanyakPembicara = getRandomInt(3, 1);
+  const acaraPembicaraPromises = acara.map((acara) => {
+    const randomBanyakPembicara = getRandomInt(PEMBICARA_PER_ACARA, 1);
     const pembicaraIndex = [];
-    for (let i = 0; i < randomBanyakPembicara; i++) {
+
+    return Array.from({ length: randomBanyakPembicara }, () => {
       let randomPembicaraIndex = getRandomInt(BANYAK_PEMBICARA - 1);
       while (pembicaraIndex.includes(randomPembicaraIndex)) {
         randomPembicaraIndex = getRandomInt(BANYAK_PEMBICARA - 1);
@@ -46,7 +51,7 @@ async function main() {
       pembicaraIndex.push(randomPembicaraIndex);
       const pembicara = dataAkunPembicara[randomPembicaraIndex];
 
-      await prisma.acaraPembicara.upsert({
+      return prisma.acaraPembicara.upsert({
         where: {
           acaraId_pembicaraId: {
             acaraId: acara.id,
@@ -59,8 +64,7 @@ async function main() {
           pembicaraId: pembicara.username,
         },
       });
-    }
-    pembicaraIndex.length = 0;
+    });
   });
 
   await Promise.all(acaraPembicaraPromises);

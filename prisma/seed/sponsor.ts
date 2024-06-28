@@ -1,5 +1,9 @@
 import { PrismaClient } from '@prisma/client';
-import { AKUN_KOSONG, BANYAK_SPONSOR } from './utils/constant';
+import {
+  AKUN_KOSONG,
+  BANYAK_SPONSOR,
+  SPONSOR_PER_ACARA,
+} from './utils/constant';
 import {
   getPaketRandom,
   getRandomCompanyName,
@@ -29,25 +33,22 @@ async function main() {
   });
 
   console.log('Update akun sponsor...');
-  const updateAkun = [];
-  for (let i = 0; i < BANYAK_SPONSOR; i++) {
-    const sponsor = dataAkunSponsor[i];
-    const nameSponsor = getRandomCompanyName();
-    updateAkun.push(
-      await prisma.akun.update({
-        where: { username: sponsor.username },
-        data: {
-          username: usernameFromCompany(nameSponsor),
-          nama: nameSponsor,
-        },
-      }),
-    );
-  }
+
+  const updateAkun = dataAkunSponsor.map((akun) => {
+    const namaSponsor = getRandomCompanyName();
+    return prisma.akun.update({
+      where: { username: akun.username },
+      data: {
+        username: usernameFromCompany(namaSponsor),
+        nama: namaSponsor,
+      },
+    });
+  });
 
   dataAkunSponsor = await Promise.all(updateAkun);
 
   const sponsorPromises = dataAkunSponsor.map(async (akun) => {
-    return await prisma.sponsor.upsert({
+    return prisma.sponsor.upsert({
       where: { username: akun.username },
       update: {},
       create: {
@@ -60,10 +61,10 @@ async function main() {
   await Promise.all(sponsorPromises);
 
   const acaraSponsorPromises = acara.map(async (acara) => {
-    const randomBanyakSponsor = getRandomInt(4, 1);
+    const randomBanyakSponsor = getRandomInt(SPONSOR_PER_ACARA, 1);
     const sponsorIndex = [];
 
-    for (let i = 0; i < randomBanyakSponsor; i++) {
+    return Array.from({ length: randomBanyakSponsor }, async () => {
       let randomSponsorIndex = getRandomInt(BANYAK_SPONSOR - 1);
       while (sponsorIndex.includes(randomSponsorIndex)) {
         randomSponsorIndex = getRandomInt(BANYAK_SPONSOR - 1);
@@ -85,8 +86,7 @@ async function main() {
           paket: getPaketRandom(),
         },
       });
-    }
-    sponsorIndex.length = 0;
+    });
   });
 
   await Promise.all(acaraSponsorPromises);
