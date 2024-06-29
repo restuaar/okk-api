@@ -67,7 +67,9 @@ async function main() {
     });
   });
 
-  await Promise.all(acaraPembicaraPromises);
+  await Promise.all(
+    acaraPembicaraPromises.map((promises) => Promise.all(promises)),
+  );
 
   console.log('Seed pembicara berhasil dijalankan!');
 }

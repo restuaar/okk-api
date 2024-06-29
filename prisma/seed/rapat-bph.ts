@@ -47,14 +47,14 @@ async function main() {
 
   console.log('Menjalankan seed anggota rapat BPH...');
 
-  const panitiaRapatPromises = rapatBPH.map(async (rapat) => {
+  for (const rapat of rapatBPH) {
     const panitiaDivisi = await prisma.panitia.findMany({
       where: {
         divisiBPHId: rapat.divisiBPHId,
       },
     });
 
-    return panitiaDivisi.map((panitia) => {
+    const panitiaPromise = panitiaDivisi.map((panitia) => {
       return prisma.panitiaRapatBPH.upsert({
         where: {
           panitiaUsername_rapatBPHWaktu_rapatBPHDivisiBPHId: {
@@ -72,9 +72,9 @@ async function main() {
         },
       });
     });
-  });
 
-  await Promise.all(panitiaRapatPromises);
+    await Promise.all(panitiaPromise);
+  }
 
   console.log('Seed rapat BPH berhasil dijalankan!');
 }

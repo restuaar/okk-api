@@ -59,7 +59,7 @@ enum TipeJabatan {
 }
 
 model DivisiPI {
-  @@map("divisi_PI")
+  @@map("divisi_pi")
 
   id            String        @id @default(uuid())
   nama          String        @unique @db.VarChar(50)
