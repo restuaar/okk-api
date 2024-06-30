@@ -1,6 +1,7 @@
 import { Global, Module } from '@nestjs/common';
 import { LoggerModule } from './logger/logger.module';
 import { ConfigModule } from '@nestjs/config';
+import { DatabaseModule } from './database/database.module';
 
 @Global()
 @Module({
@@ -9,8 +10,8 @@ import { ConfigModule } from '@nestjs/config';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    DatabaseModule,
   ],
-  providers: [],
-  exports: [],
+  exports: [LoggerModule, DatabaseModule],
 })
 export class CommonModule {}
