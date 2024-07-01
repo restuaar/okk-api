@@ -7,4 +7,7 @@ export default (): ConfigProps => ({
     on: process.env.DISCORD_WEBHOOK_ON === 'true',
     connectionString: process.env.DISCORD_WEBHOOK_CONNECTION_STRING,
   },
+  swagger: {
+    enabled: process.env.SWAGGER_ENABLED === 'true',
+  },
 });

@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
 
 describe('AppController', () => {
   let appController: AppController;
@@ -8,15 +7,19 @@ describe('AppController', () => {
   beforeEach(async () => {
     const app: TestingModule = await Test.createTestingModule({
       controllers: [AppController],
-      providers: [AppService],
     }).compile();
 
     appController = app.get<AppController>(AppController);
   });
 
-  describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
+  describe('AppController', () => {
+    it('should return description about author', () => {
+      expect(appController.main()).toBe({
+        author_url: 'https://github.com/restuaar',
+        version: '1.0.0',
+        github_url: 'https://github.com/restuaar/okk-api',
+        message: 'Welcome to OKK UI API 2024!',
+      });
     });
   });
 });
