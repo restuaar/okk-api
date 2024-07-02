@@ -23,7 +23,7 @@ export class AppController {
   @All()
   @ApiExcludeEndpoint()
   notAllowed() {
-    return new HttpException(
+    throw new HttpException(
       'Method Not Allowed. Please use GET method instead.',
       HttpStatus.METHOD_NOT_ALLOWED,
     );
