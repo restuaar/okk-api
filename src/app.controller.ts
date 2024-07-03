@@ -1,11 +1,5 @@
-import {
-  All,
-  Controller,
-  Get,
-  HttpException,
-  HttpStatus,
-} from '@nestjs/common';
-import { ApiExcludeEndpoint, ApiTags } from '@nestjs/swagger';
+import { Controller, Get } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Main')
 @Controller()
@@ -18,14 +12,5 @@ export class AppController {
       github_url: 'https://github.com/restuaar/okk-api',
       message: 'Welcome to OKK UI API 2024!',
     };
-  }
-
-  @All()
-  @ApiExcludeEndpoint()
-  notAllowed() {
-    throw new HttpException(
-      'Method Not Allowed. Please use GET method instead.',
-      HttpStatus.METHOD_NOT_ALLOWED,
-    );
   }
 }

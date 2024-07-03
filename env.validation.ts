@@ -40,6 +40,17 @@ class EnvironmentVariables {
   @IsBoolean()
   @IsOptional()
   SWAGGER_ENABLED: boolean;
+
+  @IsString()
+  JWT_SECRET: string;
+
+  @IsString()
+  @IsOptional()
+  JWT_EXPIRES_IN: string;
+
+  @IsString()
+  @IsOptional()
+  JWT_EXPIRES_IN_REFRESH: string;
 }
 
 export function validate(config: Record<string, unknown>) {

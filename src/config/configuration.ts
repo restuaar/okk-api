@@ -10,4 +10,9 @@ export default (): ConfigProps => ({
   swagger: {
     enabled: process.env.SWAGGER_ENABLED === 'true',
   },
+  jwt: {
+    secret: process.env.JWT_SECRET,
+    expiresIn: process.env.JWT_EXPIRES_IN || '1h',
+    expiresInRefresh: process.env.JWT_EXPIRES_IN_REFRESH || '7d',
+  },
 });
