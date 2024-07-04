@@ -14,6 +14,10 @@ async function bootstrap() {
   const port = configService.get<number>('port');
   const swaggerEnabled = configService.get<boolean>('swagger.enabled');
 
+  if (swaggerEnabled) {
+    createSwagger(app);
+  }
+
   app.use(cookieParser(cookieSecret));
   app.enableVersioning({
     type: VersioningType.URI,
@@ -28,10 +32,6 @@ async function bootstrap() {
       whitelist: true,
     }),
   );
-
-  if (swaggerEnabled) {
-    createSwagger(app);
-  }
 
   app.enableShutdownHooks();
 

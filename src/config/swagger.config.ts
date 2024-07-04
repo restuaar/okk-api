@@ -1,5 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ErrorResponse } from 'src/dto/error.dto';
+import { SuccessResponse } from 'src/dto/success.dto';
 
 const title = 'OKK UI API';
 const description = `
@@ -22,7 +24,7 @@ const externalDocs = {
 };
 const servers = [
   {
-    url: 'http://localhost:3000/{version}',
+    url: 'http://localhost:3000/api/{version}',
     description: 'Development server',
     variables: {
       version: {
@@ -42,9 +44,21 @@ export function createSwagger(app: INestApplication) {
     .setLicense(license.name, license.url)
     .setExternalDoc(externalDocs.description, externalDocs.url)
     .addServer(servers[0].url, servers[0].description, servers[0].variables)
-    .addBearerAuth({ in: 'header', type: 'http', bearerFormat: 'JWT' })
+    .addBearerAuth({
+      in: 'header',
+      type: 'http',
+      bearerFormat: 'JWT',
+      scheme: 'bearer',
+      name: 'JWT Auth',
+      description: 'Enter JWT token',
+    })
     .addCookieAuth('refreshToken')
     .build();
-  const document = SwaggerModule.createDocument(app, options);
-  SwaggerModule.setup('/docs', app, document);
+  const document = SwaggerModule.createDocument(app, options, {
+    ignoreGlobalPrefix: true,
+    extraModels: [SuccessResponse, ErrorResponse],
+  });
+  SwaggerModule.setup('/docs', app, document, {
+    customSiteTitle: title,
+  });
 }
