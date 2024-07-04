@@ -15,4 +15,7 @@ export default (): ConfigProps => ({
     expiresIn: process.env.JWT_EXPIRES_IN || '1h',
     expiresInRefresh: process.env.JWT_EXPIRES_IN_REFRESH || '7d',
   },
+  cookies: {
+    secret: process.env.COOKIE_SECRET,
+  },
 });

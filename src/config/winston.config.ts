@@ -21,31 +21,34 @@ if (process.env.NODE_ENV !== 'production') {
       ),
     }),
   );
-} else {
+}
+
+if (
+  process.env.DISCORD_WEBHOOK_ON === 'true' &&
+  process.env.DISCORD_WEBHOOK_CONNECTION_STRING
+) {
   transports.push(
-    new winston.transports.DailyRotateFile({
-      filename: 'logs/application-%DATE%.log',
-      datePattern: 'YYYY-MM-DD',
-      zippedArchive: true,
-      maxSize: '20m',
-      maxFiles: '14d',
-      format: winston.format.combine(
-        winston.format.timestamp(),
-        winston.format.json(),
-      ),
+    new DiscordTransport({
+      webhook: process.env.DISCORD_WEBHOOK_CONNECTION_STRING,
+      defaultMeta: { service: 'OKK API' },
+      level: 'error',
     }),
   );
 }
 
-if (process.env.DISCORD_TRANSPORT === 'true' && process.env.DISCORD_WEBHOOK) {
-  transports.push(
-    new DiscordTransport({
-      webhook: process.env.DISCORD_WEBHOOK,
-      defaultMeta: { service: 'my_node_service' },
-      level: 'warn',
-    }),
-  );
-}
+transports.push(
+  new winston.transports.DailyRotateFile({
+    filename: 'logs/application-%DATE%.log',
+    datePattern: 'YYYY-MM-DD',
+    zippedArchive: true,
+    maxSize: '20m',
+    maxFiles: '14d',
+    format: winston.format.combine(
+      winston.format.timestamp(),
+      winston.format.json(),
+    ),
+  }),
+);
 
 export const logger = winston.createLogger({
   format: winston.format.json(),

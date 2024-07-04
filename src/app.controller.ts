@@ -1,7 +1,11 @@
 import { Controller, Get } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiExtraModels, ApiTags } from '@nestjs/swagger';
+import { SuccessResponse } from './dto/success.dto';
+import { ErrorResponse } from './dto/error.dto';
 
 @ApiTags('Main')
+@ApiExtraModels(ErrorResponse)
+@ApiExtraModels(SuccessResponse)
 @Controller()
 export class AppController {
   @Get()

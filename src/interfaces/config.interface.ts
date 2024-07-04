@@ -13,10 +13,15 @@ interface JwtConfig {
   expiresInRefresh: string;
 }
 
+interface CookieConfig {
+  secret: string;
+}
+
 export interface ConfigProps {
   port: number;
   env: string;
   discordWebhook: DiscordTransportConfig;
   swagger: SwaggerConfig;
   jwt: JwtConfig;
+  cookies: CookieConfig;
 }

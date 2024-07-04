@@ -22,7 +22,7 @@ const externalDocs = {
 };
 const servers = [
   {
-    url: 'https://localhost:3000/{version}',
+    url: 'http://localhost:3000/{version}',
     description: 'Development server',
     variables: {
       version: {
@@ -42,6 +42,8 @@ export function createSwagger(app: INestApplication) {
     .setLicense(license.name, license.url)
     .setExternalDoc(externalDocs.description, externalDocs.url)
     .addServer(servers[0].url, servers[0].description, servers[0].variables)
+    .addBearerAuth({ in: 'header', type: 'http', bearerFormat: 'JWT' })
+    .addCookieAuth('refreshToken')
     .build();
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('/docs', app, document);

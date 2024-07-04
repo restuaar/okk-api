@@ -51,6 +51,9 @@ class EnvironmentVariables {
   @IsString()
   @IsOptional()
   JWT_EXPIRES_IN_REFRESH: string;
+
+  @IsString()
+  COOKIE_SECRET: string;
 }
 
 export function validate(config: Record<string, unknown>) {

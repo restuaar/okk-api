@@ -2,13 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
-import { PrismaService } from '../../common/database/database.service';
+import { AuthService } from '../auth.service';
+import { PayloadAuth } from 'src/interfaces/auth.interface';
+import { User } from '../dto/user.dto';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     private readonly configService: ConfigService,
-    private readonly prismaService: PrismaService,
+    private readonly authService: AuthService,
   ) {
     super({
       ignoreExpiration: false,
@@ -17,15 +19,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: any) {
-    const user = await this.prismaService.akun.findUnique({
-      where: {
-        id: payload.id,
-      },
-    });
+  async validate(payload: PayloadAuth): Promise<User> {
+    const user = await this.authService.validateUserById(payload.sub);
 
     return {
-      id: user.id,
       username: user.username,
       nama: user.nama,
       createdAt: user.createdAt,

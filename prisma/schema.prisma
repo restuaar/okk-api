@@ -230,3 +230,12 @@ model AcaraPembicara {
 
   @@id([acaraId, pembicaraId])
 }
+
+model RefreshToken {
+  @@map("refresh_token")
+
+  idUser       String        @default(uuid())
+  token        String        
+
+  @@id([idUser, token])
+}
