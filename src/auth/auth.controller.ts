@@ -139,7 +139,7 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ): Promise<SuccessResponse<AuthResponse>> {
-    const refreshToken = req.cookies.refreshToken;
+    const refreshToken = req.signedCookies.refreshToken;
 
     if (!refreshToken) {
       throw new UnauthorizedException('Refresh token not found');
@@ -151,7 +151,7 @@ export class AuthController {
     );
 
     const { access_token, refresh_token } =
-      await this.authService.handleRefreshToken(req.cookies.refreshToken);
+      await this.authService.handleRefreshToken(refreshToken);
 
     this.setRefreshTokenCookie(res, refresh_token);
 
@@ -165,6 +165,7 @@ export class AuthController {
     const timeJwt = this.configService.get<string>('jwt.expiresInRefresh');
 
     res.cookie('refreshToken', token, {
+      signed: true,
       httpOnly: true,
       sameSite: 'strict',
       maxAge: jwtConvertTime(timeJwt),
