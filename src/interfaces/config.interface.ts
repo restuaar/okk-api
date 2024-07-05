@@ -9,6 +9,7 @@ interface SwaggerConfig {
 
 interface JwtConfig {
   secret: string;
+  secretRefresh: string;
   expiresIn: string;
   expiresInRefresh: string;
 }

@@ -16,6 +16,7 @@ import { AuthController } from './auth.controller';
         secret: configService.get<string>('jwt.secret'),
       }),
       inject: [ConfigService],
+      global: true,
     }),
   ],
   providers: [AuthService, LocalStrategy, JwtStrategy],

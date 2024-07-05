@@ -234,8 +234,6 @@ model AcaraPembicara {
 model RefreshToken {
   @@map("refresh_token")
 
-  idUser       String        @default(uuid())
-  token        String        
-
-  @@id([idUser, token])
+  idUser       String        @id @default(uuid())
+  token        String        @unique
 }

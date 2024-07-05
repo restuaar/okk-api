@@ -45,6 +45,9 @@ class EnvironmentVariables {
   JWT_SECRET: string;
 
   @IsString()
+  JWT_SECRET_REFRESH: string;
+
+  @IsString()
   @IsOptional()
   JWT_EXPIRES_IN: string;
 
