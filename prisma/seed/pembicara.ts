@@ -53,15 +53,15 @@ async function main() {
 
       return prisma.acaraPembicara.upsert({
         where: {
-          acaraId_pembicaraId: {
-            acaraId: acara.id,
-            pembicaraId: pembicara.username,
+          id_acara_id_pembicara: {
+            id_acara: acara.id,
+            id_pembicara: pembicara.username,
           },
         },
         update: {},
         create: {
-          acaraId: acara.id,
-          pembicaraId: pembicara.username,
+          id_acara: acara.id,
+          id_pembicara: pembicara.username,
         },
       });
     });

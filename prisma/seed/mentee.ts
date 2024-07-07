@@ -33,7 +33,7 @@ async function main() {
         fakultas: dataRandom.fakultas,
         jurusan: dataRandom.jurusan,
         angkatan: dataRandom.angkatan,
-        noKelompokOKK: kelompok.no,
+        no_kelompok_okk: kelompok.no,
       },
     });
   });

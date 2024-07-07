@@ -13,7 +13,7 @@ async function main() {
 
   const mentors = await prisma.panitia.findMany({
     where: {
-      divisiBPH: {
+      divisi_bph: {
         nama: 'Mentor',
       },
     },
@@ -26,7 +26,7 @@ async function main() {
       create: {
         id: uuidv6(),
         no: index + 1,
-        usernameMentor: mentor.username,
+        username_mentor: mentor.username,
       },
     });
   });

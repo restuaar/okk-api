@@ -18,16 +18,16 @@ export const SPONSOR_PER_ACARA = 4;
 
 export const AKUN_KOSONG = [
   {
-    Panitia: { is: null },
+    panitia: { is: null },
   },
   {
-    Mentee: { is: null },
+    mentee: { is: null },
   },
   {
-    Pembicara: { is: null },
+    pembicara: { is: null },
   },
   {
-    Sponsor: { is: null },
+    sponsor: { is: null },
   },
 ];
 

@@ -34,7 +34,7 @@ async function main() {
         fakultas: dataRandom.fakultas,
         jurusan: dataRandom.jurusan,
         angkatan: dataRandom.angkatan,
-        divisiPIId: divisiPI[index].id,
+        divisi_pi_id: divisiPI[index].id,
         jabatan: TipeJabatan.PENGURUS_INTI,
       },
     });
@@ -66,7 +66,7 @@ async function main() {
         fakultas: dataRandom.fakultas,
         jurusan: dataRandom.jurusan,
         angkatan: dataRandom.angkatan,
-        divisiBPHId: divisi.id,
+        divisi_bph_id: divisi.id,
         jabatan: getJabatanByIndex(index),
       },
     });

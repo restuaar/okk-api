@@ -18,12 +18,12 @@ model Akun {
   username      String        @unique @db.VarChar(100)
   password      String        @db.VarChar(100)
   nama          String        @db.VarChar(255)
-  createdAt     DateTime      @default(now())
+  created_at    DateTime      @default(now())
 
-  Panitia       Panitia?
-  Mentee        Mentee?
-  Sponsor       Sponsor?
-  Pembicara     Pembicara?
+  panitia       Panitia?
+  mentee        Mentee?
+  sponsor       Sponsor?
+  pembicara     Pembicara?
 
   @@map("akun")
 }
@@ -35,8 +35,8 @@ model Panitia {
   fakultas      String        @db.VarChar(50)
   jurusan       String        @db.VarChar(50)
   angkatan      Int           @db.SmallInt
-  divisiPIId    String?       @unique
-  divisiBPHId   String?
+  divisi_pi_id  String?       @unique
+  divisi_bph_id String?
   jabatan       TipeJabatan   @default(STAFF)
 
   hadirRapatBPH PanitiaRapatBPH[]
@@ -44,8 +44,8 @@ model Panitia {
   kelompokOKK   KelompokOKK?
   
   akun          Akun          @relation(fields: [username], references: [username])
-  divisiPI      DivisiPI?     @relation(fields: [divisiPIId], references: [id])
-  divisiBPH     DivisiBPH?    @relation(fields: [divisiBPHId], references: [id])
+  divisi_pi      DivisiPI?     @relation(fields: [divisi_pi_id], references: [id])
+  divisi_bph     DivisiBPH?    @relation(fields: [divisi_bph_id], references: [id])
 }
 
 enum TipeJabatan {
@@ -73,11 +73,11 @@ model DivisiBPH {
 
   id            String        @id @default(uuid())
   nama          String        @unique @db.VarChar(50)
-  divisiBagian  String        
+  divisi_bagian String        
   panitia       Panitia[]
-  rapatBPH      RapatBPH[]
+  rapat_bph     RapatBPH[]
 
-  divisiPI      DivisiPI?      @relation(fields: [divisiBagian], references: [nama])
+  divisi_pi     DivisiPI?      @relation(fields: [divisi_bagian], references: [nama])
 }
 
 model RapatBPH {
@@ -86,25 +86,25 @@ model RapatBPH {
   waktu         DateTime      @db.Timestamp()
   tempat        String        @db.VarChar(255)
   kesimpulan    String        @db.Text
-  divisiBPHId   String
-  panitiaHadir  PanitiaRapatBPH[]
+  divisi_bph_id String
+  panitia_hadir PanitiaRapatBPH[]
 
-  @@id([divisiBPHId, waktu])
-  divisiBPH     DivisiBPH     @relation(fields: [divisiBPHId], references: [id])
+  @@id([divisi_bph_id, waktu])
+  divisiBPH     DivisiBPH     @relation(fields: [divisi_bph_id], references: [id])
 }
 
 model PanitiaRapatBPH {
   @@map("panitia_rapat_bph")
 
-  panitiaUsername     String   @db.VarChar(100)
-  waktuHadir          DateTime @db.Timestamp()
-  rapatBPHWaktu       DateTime @db.Timestamp()
-  rapatBPHDivisiBPHId String 
+  panitia_username  String   @db.VarChar(100)
+  waktu_hadir       DateTime @db.Timestamp()
+  waktu_rapat       DateTime @db.Timestamp()
+  divisi_bph_id     String 
 
-  panitia        Panitia  @relation(fields: [panitiaUsername], references: [username])
-  rapatBPH       RapatBPH @relation(fields: [rapatBPHWaktu, rapatBPHDivisiBPHId], references: [waktu, divisiBPHId])
+  panitia        Panitia  @relation(fields: [panitia_username], references: [username])
+  rapatBPH       RapatBPH @relation(fields: [waktu_rapat, divisi_bph_id], references: [waktu, divisi_bph_id])
 
-  @@id([panitiaUsername, rapatBPHWaktu, rapatBPHDivisiBPHId])
+  @@id([panitia_username, waktu_rapat, divisi_bph_id])
 }
 
 model KelompokOKK {
@@ -114,63 +114,64 @@ model KelompokOKK {
   no              Int           @unique @db.SmallInt
   anggota         Mentee[]
 
-  usernameMentor  String        @unique
+  username_mentor String        @unique
   mentoring       Mentoring[]
 
-  mentor          Panitia       @relation(fields: [usernameMentor], references: [username])
+  mentor          Panitia       @relation(fields: [username_mentor], references: [username])
 }
 
 model Mentee {
   @@map("mentee")
 
-  username      String        @id @default(uuid())
-  fakultas      String        @db.VarChar(50)
-  jurusan       String        @db.VarChar(50)
-  angkatan      Int           @db.SmallInt
-  noKelompokOKK Int           @db.SmallInt
+  username        String        @id @default(uuid())
+  fakultas        String        @db.VarChar(50)
+  jurusan         String        @db.VarChar(50)
+  angkatan        Int           @db.SmallInt
+  no_kelompok_okk Int           @db.SmallInt
 
   hadirMentoring MenteeMentoring[]
 
   akun          Akun          @relation(fields: [username], references: [username])
-  kelompokOKK   KelompokOKK   @relation(fields: [noKelompokOKK], references: [no])
+  kelompokOKK   KelompokOKK   @relation(fields: [no_kelompok_okk], references: [no])
 }
 
 model Mentoring {
   @@map("mentoring")
 
-  waktu         DateTime      @db.Timestamp()
-  tempat        String        @db.VarChar(255)
-  materi        String        @db.Text
-  noKelompokOKK Int           @db.SmallInt
-  menteeHadir   MenteeMentoring[]
-  kelompokOKK   KelompokOKK   @relation(fields: [noKelompokOKK], references: [no])
+  waktu           DateTime      @db.Timestamp()
+  tempat          String        @db.VarChar(255)
+  materi          String        @db.Text
+  no_kelompok     Int           @db.SmallInt
+  mentee_hadir    MenteeMentoring[]
 
-  @@id([noKelompokOKK, waktu])
+  kelompok_okk     KelompokOKK   @relation(fields: [no_kelompok], references: [no])
+
+  @@id([no_kelompok, waktu])
 }
 
 model MenteeMentoring {
   @@map("mentee_mentoring")
 
-  menteeUsername  String   @db.VarChar(100)
-  waktuHadir      DateTime @db.Timestamp()
-  mentoringWaktu  DateTime @db.Timestamp()
-  mentoringNoKelompokOKK Int
+  mentee_username  String   @db.VarChar(100)
+  waktu_hadir      DateTime @db.Timestamp()
+  waktu_mentoring  DateTime @db.Timestamp()
+  no_kelompok      Int
 
-  mentee        Mentee    @relation(fields: [menteeUsername], references: [username])
-  mentoring     Mentoring @relation(fields: [mentoringWaktu, mentoringNoKelompokOKK], references: [waktu, noKelompokOKK])
+  mentee        Mentee    @relation(fields: [mentee_username], references: [username])
+  mentoring     Mentoring @relation(fields: [waktu_mentoring, no_kelompok], references: [waktu, no_kelompok])
 
-  @@id([menteeUsername, mentoringWaktu, mentoringNoKelompokOKK])
+  @@id([mentee_username, waktu_mentoring, no_kelompok])
 }
 
 model Acara {
   @@map("acara")
 
-  id           String        @id @default(uuid())
-  nama         String        @db.VarChar(100)
-  waktuMulai   DateTime      @db.Timestamp()
-  waktuSelesai DateTime      @db.Timestamp()
-  tempat       String        @db.VarChar(255)
-  deskripsi    String
+  id            String        @id @default(uuid())
+  nama          String        @db.VarChar(100)
+  waktu_mulai   DateTime      @db.Timestamp()
+  waktu_selesai DateTime      @db.Timestamp()
+  tempat        String        @db.VarChar(255)
+  deskripsi     String
 
   sponsor      AcaraSponsor[]
   pembicara    AcaraPembicara[]
@@ -190,14 +191,14 @@ model Sponsor {
 model AcaraSponsor {
   @@map("acara_sponsor")
 
-  acaraId      String
-  sponsorId    String   @db.VarChar(100)
-  paket        PaketSponsor   
+  id_acara      String       @db.VarChar(100)
+  id_sponsor    String       @db.VarChar(100)
+  paket         PaketSponsor   
 
-  acara        Acara    @relation(fields: [acaraId], references: [id])
-  sponsor      Sponsor  @relation(fields: [sponsorId], references: [username])
+  acara         Acara        @relation(fields: [id_acara], references: [id])
+  sponsor       Sponsor      @relation(fields: [id_sponsor], references: [username])
 
-  @@id([acaraId, sponsorId])
+  @@id([id_acara, id_sponsor])
 }
 
 enum PaketSponsor {
@@ -222,13 +223,13 @@ model Pembicara {
 model AcaraPembicara {
   @@map("acara_pembicara")
 
-  acaraId      String     
-  pembicaraId  String    @db.VarChar(100)
+  id_acara      String        @db.VarChar(100)
+  id_pembicara  String        @db.VarChar(100)
 
-  acara        Acara     @relation(fields: [acaraId], references: [id])
-  pembicara    Pembicara @relation(fields: [pembicaraId], references: [username])
+  acara        Acara          @relation(fields: [id_acara], references: [id])
+  pembicara    Pembicara      @relation(fields: [id_pembicara], references: [username])
 
-  @@id([acaraId, pembicaraId])
+  @@id([id_acara, id_pembicara])
 }
 
 model RefreshToken {

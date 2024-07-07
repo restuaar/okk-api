@@ -27,8 +27,8 @@ async function main() {
       const waktu = getRandomWaktu();
       return prisma.rapatBPH.upsert({
         where: {
-          divisiBPHId_waktu: {
-            divisiBPHId: divisi.id,
+          divisi_bph_id_waktu: {
+            divisi_bph_id: divisi.id,
             waktu: waktu,
           },
         },
@@ -37,7 +37,7 @@ async function main() {
           waktu: waktu,
           tempat: getRandomTempat(),
           kesimpulan: getRandomKalimat(),
-          divisiBPHId: divisi.id,
+          divisi_bph_id: divisi.id,
         },
       });
     },
@@ -50,25 +50,25 @@ async function main() {
   for (const rapat of rapatBPH) {
     const panitiaDivisi = await prisma.panitia.findMany({
       where: {
-        divisiBPHId: rapat.divisiBPHId,
+        divisi_bph_id: rapat.divisi_bph_id,
       },
     });
 
     const panitiaPromise = panitiaDivisi.map((panitia) => {
       return prisma.panitiaRapatBPH.upsert({
         where: {
-          panitiaUsername_rapatBPHWaktu_rapatBPHDivisiBPHId: {
-            panitiaUsername: panitia.username,
-            rapatBPHWaktu: rapat.waktu,
-            rapatBPHDivisiBPHId: rapat.divisiBPHId,
+          panitia_username_waktu_rapat_divisi_bph_id: {
+            panitia_username: panitia.username,
+            waktu_rapat: rapat.waktu,
+            divisi_bph_id: rapat.divisi_bph_id,
           },
         },
         update: {},
         create: {
-          panitiaUsername: panitia.username,
-          waktuHadir: getRandomWaktu(rapat.waktu),
-          rapatBPHWaktu: rapat.waktu,
-          rapatBPHDivisiBPHId: rapat.divisiBPHId,
+          panitia_username: panitia.username,
+          waktu_hadir: getRandomWaktu(rapat.waktu),
+          waktu_rapat: rapat.waktu,
+          divisi_bph_id: rapat.divisi_bph_id,
         },
       });
     });

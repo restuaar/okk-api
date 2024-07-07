@@ -24,8 +24,8 @@ async function main() {
       const waktu = getRandomWaktu();
       return prisma.mentoring.upsert({
         where: {
-          noKelompokOKK_waktu: {
-            noKelompokOKK: kelompok.no,
+          no_kelompok_waktu: {
+            no_kelompok: kelompok.no,
             waktu: waktu,
           },
         },
@@ -34,7 +34,7 @@ async function main() {
           waktu: waktu,
           tempat: getRandomTempat(),
           materi: getRandomMateri(),
-          noKelompokOKK: kelompok.no,
+          no_kelompok: kelompok.no,
         },
       });
     });
@@ -49,25 +49,25 @@ async function main() {
       return mentoringKelompok.map(async (mentoring) => {
         const mentee = await prisma.mentee.findMany({
           where: {
-            noKelompokOKK: mentoring.noKelompokOKK,
+            no_kelompok_okk: mentoring.no_kelompok,
           },
         });
 
         return mentee.map(async (mentee) => {
           return prisma.menteeMentoring.upsert({
             where: {
-              menteeUsername_mentoringWaktu_mentoringNoKelompokOKK: {
-                menteeUsername: mentee.username,
-                mentoringWaktu: mentoring.waktu,
-                mentoringNoKelompokOKK: mentoring.noKelompokOKK,
+              mentee_username_waktu_mentoring_no_kelompok: {
+                mentee_username: mentee.username,
+                waktu_mentoring: mentoring.waktu,
+                no_kelompok: mentoring.no_kelompok,
               },
             },
             update: {},
             create: {
-              menteeUsername: mentee.username,
-              waktuHadir: getRandomWaktu(mentoring.waktu),
-              mentoringWaktu: mentoring.waktu,
-              mentoringNoKelompokOKK: mentoring.noKelompokOKK,
+              mentee_username: mentee.username,
+              waktu_hadir: getRandomWaktu(mentoring.waktu),
+              waktu_mentoring: mentoring.waktu,
+              no_kelompok: mentoring.no_kelompok,
             },
           });
         });

@@ -21,8 +21,8 @@ async function main() {
         id: uuid,
         nama: acara.nama,
         tempat: acara.tempat,
-        waktuMulai: acara.waktuMulai,
-        waktuSelesai: acara.waktuSelesai,
+        waktu_mulai: acara.waktuMulai,
+        waktu_selesai: acara.waktuSelesai,
         deskripsi: acara.deskripsi,
       },
     });

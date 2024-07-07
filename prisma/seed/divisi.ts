@@ -35,7 +35,7 @@ async function main() {
         create: {
           id: uuid,
           nama: bph,
-          divisiBagian: divisi.divisiPI,
+          divisi_bagian: divisi.divisiPI,
         },
       });
     });

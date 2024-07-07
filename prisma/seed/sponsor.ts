@@ -74,15 +74,15 @@ async function main() {
 
       await prisma.acaraSponsor.upsert({
         where: {
-          acaraId_sponsorId: {
-            acaraId: acara.id,
-            sponsorId: sponsor.username,
+          id_acara_id_sponsor: {
+            id_acara: acara.id,
+            id_sponsor: sponsor.username,
           },
         },
         update: {},
         create: {
-          acaraId: acara.id,
-          sponsorId: sponsor.username,
+          id_acara: acara.id,
+          id_sponsor: sponsor.username,
           paket: getPaketRandom(),
         },
       });
