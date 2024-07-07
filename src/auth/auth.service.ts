@@ -7,8 +7,10 @@ import { ConfigService } from '@nestjs/config';
 import { LoggerService } from 'src/common/logger/logger.service';
 import { PayloadAuth } from 'src/interfaces/auth.interface';
 import { RegisterRequestDto } from './dto/register.dto';
-import { ROUND_OF_SALT } from 'src/utils/constant';
-import { UserEntity } from './entities/user.entity';
+import { ROUND_OF_SALT } from 'src/interfaces/constant';
+import { UserEntity } from 'src/users/entities/user.entity';
+import { UpdateUserDto } from 'src/users/dto/update-user.dto';
+import { v6 as uuidv6 } from 'uuid';
 
 @Injectable()
 export class AuthService {
@@ -25,35 +27,46 @@ export class AuthService {
   ): Promise<UserEntity> {
     this.logger.log(`Validating user ${username}`, 'AuthService');
 
+    const roleUser = await this.prismaService.getRoleUser(username);
     const user = await this.prismaService.akun.findUnique({
       where: {
         username,
       },
+      include: roleUser.type,
     });
-
-    if (user) {
-      const { password } = user;
-      const isMatch = await compare(passwordReq, password);
-      if (isMatch) return user;
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
     }
 
-    throw new UnauthorizedException('Invalid credentials');
+    const isPasswordMatch = await compare(passwordReq, user.password);
+    if (!isPasswordMatch) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    return {
+      ...user,
+      role: roleUser.role,
+    };
   }
 
   async validateUserById(id: string): Promise<UserEntity> {
     this.logger.log(`Validating user with id ${id}`, 'AuthService');
 
+    const roleUser = await this.prismaService.getRoleUser(id, true);
     const user = await this.prismaService.akun.findUnique({
       where: {
         id,
       },
+      include: roleUser.type,
     });
-
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    return user;
+    return {
+      ...user,
+      role: roleUser.role,
+    };
   }
 
   async register(user: RegisterRequestDto): Promise<UserEntity> {
@@ -62,11 +75,13 @@ export class AuthService {
     const userCreated = await this.prismaService.akun.create({
       data: {
         ...user,
+        id: uuidv6(),
         password: await hash(user.password, ROUND_OF_SALT),
       },
     });
 
-    return userCreated;
+    const roleUser = await this.prismaService.getRoleUser(user.username);
+    return { ...userCreated, role: roleUser.role };
   }
 
   async login(user: UserEntity): Promise<AuthResponse> {
@@ -90,6 +105,31 @@ export class AuthService {
       },
     });
     return user;
+  }
+
+  async updateProfile(
+    user: UserEntity,
+    updateUser: UpdateUserDto,
+  ): Promise<UserEntity> {
+    this.logger.log(`Update user with id ${user.id}`, 'AuthService');
+
+    const roleUser = await this.prismaService.getRoleUser(user.username);
+    const userUpdated = await this.prismaService.akun.update({
+      where: {
+        id: user.id,
+        username: user.username,
+      },
+      data: {
+        username: updateUser.username ?? user.username,
+        password: updateUser.password
+          ? await hash(updateUser.password, ROUND_OF_SALT)
+          : user.password,
+        nama: updateUser.nama ?? user.nama,
+      },
+      include: roleUser.type,
+    });
+
+    return { ...userUpdated, role: roleUser.role };
   }
 
   async handleRefreshToken(refreshToken: string): Promise<AuthResponse> {

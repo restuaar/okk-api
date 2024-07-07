@@ -14,7 +14,11 @@ export class ErrorFilter implements ExceptionFilter {
     const responseBody = exception.getResponse();
     const errorMessage = responseBody['message'] || responseBody['error'];
 
-    this.logger.error(errorMessage, 'HttpException', 'ErrorFilter');
+    this.logger.warn(errorMessage, 'ErrorFilter');
+
+    if (exception.getStatus() === 500) {
+      this.logger.error(exception.message, exception.stack, 'ErrorFilter');
+    }
 
     return response.status(exception.getStatus()).json({
       status: exception.getStatus(),

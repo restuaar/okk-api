@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Patch,
   Post,
   Req,
   Res,
@@ -20,22 +21,20 @@ import {
 import { AuthService } from './auth.service';
 import { ConfigService } from '@nestjs/config';
 import { LocalAuthGuard } from './guards/local-auth.guard';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { AuthResponse } from './dto/auth.dto';
 import { Request, Response } from 'express';
 import { jwtConvertTime } from 'src/utils/jwt-convert-time';
 import { SuccessResponse } from 'src/dto/success.dto';
 import { LoginRequestDto } from './dto/login.dto';
 import { createResponseSchema } from 'src/utils/schema-swagger';
-import { UserEntity } from './entities/user.entity';
 import { LoggerService } from 'src/common/logger/logger.service';
 import { RegisterRequestDto } from './dto/register.dto';
+import { UserEntity } from 'src/users/entities/user.entity';
+import { UpdateUserDto } from 'src/users/dto/update-user.dto';
 
 @ApiTags('Auth')
-@Controller({
-  version: '1',
-  path: 'auth',
-})
+@Controller('auth')
 @ApiExtraModels(UserEntity)
 @ApiExtraModels(AuthResponse)
 export class AuthController {
@@ -126,6 +125,32 @@ export class AuthController {
     );
     return {
       message: 'Get profile success',
+      data: user,
+    };
+  }
+
+  @Patch('/profile')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse({
+    schema: createResponseSchema(UserEntity),
+  })
+  async updateProfile(
+    @Req() req: Request,
+    @Body() updateUserDto: UpdateUserDto,
+  ): Promise<SuccessResponse<UserEntity>> {
+    const user = new UserEntity(
+      await this.authService.updateProfile(
+        req.user as UserEntity,
+        updateUserDto,
+      ),
+    );
+    this.logger.log(
+      `Update profile success with user ${user.username}`,
+      'AuthController',
+    );
+    return {
+      message: 'Update profile success',
       data: user,
     };
   }
