@@ -11,7 +11,14 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RoleGuard } from 'src/common/guards/role.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
@@ -21,24 +28,34 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { SearchUserDto } from './dto/search-user.dto';
 import { SuccessResponse } from 'src/dto/success.dto';
+import { createResponseSchema } from 'src/utils/schema-swagger';
 
 @ApiTags('Users')
 @Controller('users')
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RoleGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
   @Roles([Role.PENGURUS_INTI, Role.PJ])
+  @ApiQuery({ name: 'nama', required: false, type: String })
+  @ApiQuery({ name: 'page', required: false, type: String })
+  @ApiQuery({ name: 'size', required: false, type: String })
+  @ApiOkResponse({
+    description: 'Success get users',
+    schema: createResponseSchema(UserEntity, true),
+    isArray: true,
+  })
   async searchUser(
     @Query('nama') nama?: string,
-    @Query('page', new ParseIntPipe({ optional: true })) page?: number,
-    @Query('size', new ParseIntPipe({ optional: true })) size?: number,
+    @Query('page', new ParseIntPipe({ optional: true })) page: number = 1,
+    @Query('size', new ParseIntPipe({ optional: true })) size: number = 10,
   ): Promise<SuccessResponse<UserEntity[]>> {
     const searchQuery: SearchUserDto = {
       nama,
-      page: page ?? 1,
-      size: size ?? 10,
+      page,
+      size,
     };
     const result = await this.usersService.searchUser(searchQuery);
     const users = result.users.map((user) => new UserEntity(user));
@@ -52,6 +69,10 @@ export class UsersController {
 
   @Get('/:id')
   @Roles([Role.PENGURUS_INTI, Role.PJ])
+  @ApiOkResponse({
+    description: 'Success get user',
+    schema: createResponseSchema(UserEntity),
+  })
   async getUserById(@Param('id') id: string) {
     const user = new UserEntity(await this.usersService.getUser(id));
     return {
@@ -62,6 +83,10 @@ export class UsersController {
 
   @Get('/username/:username')
   @Roles([Role.PENGURUS_INTI, Role.PJ])
+  @ApiOkResponse({
+    description: 'Success get user',
+    schema: createResponseSchema(UserEntity),
+  })
   async getUserByUsername(@Param('username') username: string) {
     const user = new UserEntity(await this.usersService.getUser(username));
     return {
@@ -72,6 +97,10 @@ export class UsersController {
 
   @Post()
   @Roles([Role.PENGURUS_INTI, Role.PJ])
+  @ApiCreatedResponse({
+    description: 'Success create user',
+    schema: createResponseSchema(UserEntity),
+  })
   async createUser(@Body() createUserDto: CreateUserDto) {
     const user = new UserEntity(
       await this.usersService.createUser(createUserDto),
@@ -84,6 +113,12 @@ export class UsersController {
 
   @Post('/batch')
   @Roles([Role.PENGURUS_INTI, Role.PJ])
+  @ApiCreatedResponse({
+    description: 'Success create user',
+    schema: createResponseSchema(UserEntity, true),
+    isArray: true,
+  })
+  @ApiBody({ type: [CreateUserDto] })
   async createManyUser(@Body() createUserDto: CreateUserDto[]) {
     const users = await this.usersService.createManyUser(createUserDto);
     const usersEntity = users.map((user) => new UserEntity(user));
@@ -95,6 +130,10 @@ export class UsersController {
 
   @Patch('/:id')
   @Roles([Role.PENGURUS_INTI, Role.PJ])
+  @ApiOkResponse({
+    description: 'Success update user',
+    schema: createResponseSchema(UserEntity),
+  })
   async updateUserById(
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
@@ -110,6 +149,10 @@ export class UsersController {
 
   @Patch('/username/:username')
   @Roles([Role.PENGURUS_INTI, Role.PJ])
+  @ApiOkResponse({
+    description: 'Success update user',
+    schema: createResponseSchema(UserEntity),
+  })
   async updateUserByUsername(
     @Param('username') username: string,
     @Body() updateUserDto: UpdateUserDto,
@@ -125,6 +168,10 @@ export class UsersController {
 
   @Delete('/:id')
   @Roles([Role.PENGURUS_INTI, Role.PJ])
+  @ApiOkResponse({
+    description: 'Success delete user',
+    schema: createResponseSchema(UserEntity),
+  })
   async deleteUserById(@Param('id') id: string) {
     const user = new UserEntity(await this.usersService.deleteUser(id));
     return {
@@ -135,6 +182,10 @@ export class UsersController {
 
   @Delete('/username/:username')
   @Roles([Role.PENGURUS_INTI, Role.PJ])
+  @ApiOkResponse({
+    description: 'Success delete user',
+    schema: createResponseSchema(UserEntity),
+  })
   async deleteUserByUsername(@Param('username') username: string) {
     const user = new UserEntity(await this.usersService.deleteUser(username));
     return {

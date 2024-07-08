@@ -1,7 +1,9 @@
 import { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { AuthResponse } from 'src/auth/dto/auth.dto';
 import { ErrorResponse } from 'src/dto/error.dto';
 import { SuccessResponse } from 'src/dto/success.dto';
+import { UserEntity } from 'src/users/entities/user.entity';
 
 const title = 'OKK UI API';
 const description = `
@@ -56,7 +58,7 @@ export function createSwagger(app: INestApplication) {
     .build();
   const document = SwaggerModule.createDocument(app, options, {
     ignoreGlobalPrefix: true,
-    extraModels: [SuccessResponse, ErrorResponse],
+    extraModels: [SuccessResponse, ErrorResponse, UserEntity, AuthResponse],
   });
   SwaggerModule.setup('/docs', app, document, {
     customSiteTitle: title,

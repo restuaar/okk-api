@@ -14,7 +14,6 @@ import {
 import {
   ApiBearerAuth,
   ApiCookieAuth,
-  ApiExtraModels,
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -35,8 +34,6 @@ import { UpdateUserDto } from 'src/users/dto/update-user.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
-@ApiExtraModels(UserEntity)
-@ApiExtraModels(AuthResponse)
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
