@@ -8,6 +8,8 @@ import { v6 as uuidv6 } from 'uuid';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { validate as isUUID } from 'uuid';
 import { UserEntity } from './entities/user.entity';
+import { SearchUserDto } from './dto/search-user.dto';
+import { Page } from 'src/dto/success.dto';
 
 @Injectable()
 export class UsersService {
@@ -15,6 +17,47 @@ export class UsersService {
     private readonly prismaService: PrismaService,
     private readonly logger: LoggerService,
   ) {}
+
+  async searchUser(
+    searchQuery: SearchUserDto,
+  ): Promise<{ users: UserEntity[]; page: Page }> {
+    this.logger.log('Search user', 'UsersService');
+    const result = await this.prismaService.akun.findMany({
+      where: {
+        nama: {
+          contains: searchQuery.nama,
+        },
+      },
+      skip: (searchQuery.page - 1) * searchQuery.size,
+      take: searchQuery.size,
+    });
+
+    const totalData = await this.prismaService.akun.count({
+      where: {
+        nama: {
+          contains: searchQuery.nama,
+        },
+      },
+    });
+
+    const usersWithRole = await Promise.all(
+      result.map((user) => this.getUser(user.id)),
+    );
+    const users = usersWithRole.map((user) => ({
+      ...user,
+      role: user.role,
+    }));
+
+    return {
+      users,
+      page: {
+        current_page: searchQuery.page,
+        total_page: Math.ceil(totalData / searchQuery.size),
+        size: searchQuery.size,
+        total_size: totalData,
+      },
+    };
+  }
 
   async getUser(unique: string): Promise<UserEntity | any> {
     this.logger.log(`Get user ${unique}`, 'UsersService');

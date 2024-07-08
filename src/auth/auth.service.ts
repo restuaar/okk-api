@@ -5,7 +5,7 @@ import { AuthResponse } from './dto/auth.dto';
 import { PrismaService } from 'src/common/database/database.service';
 import { ConfigService } from '@nestjs/config';
 import { LoggerService } from 'src/common/logger/logger.service';
-import { PayloadAuth } from 'src/interfaces/auth.interface';
+import { PayloadAuth } from 'src/interfaces/user.interface';
 import { RegisterRequestDto } from './dto/register.dto';
 import { ROUND_OF_SALT } from 'src/interfaces/constant';
 import { UserEntity } from 'src/users/entities/user.entity';

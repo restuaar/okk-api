@@ -1,7 +1,7 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { Prisma, PrismaClient, TipeJabatan } from '@prisma/client';
 import { LoggerService } from '../logger/logger.service';
-import { Role, UserRole } from 'src/interfaces/auth.interface';
+import { Role, UserRole } from 'src/interfaces/user.interface';
 
 @Injectable()
 export class PrismaService

@@ -4,8 +4,10 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
@@ -13,16 +15,40 @@ import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RoleGuard } from 'src/common/guards/role.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
-import { Role } from 'src/interfaces/auth.interface';
+import { Role } from 'src/interfaces/user.interface';
 import { UserEntity } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { SearchUserDto } from './dto/search-user.dto';
+import { SuccessResponse } from 'src/dto/success.dto';
 
 @ApiTags('Users')
 @Controller('users')
 @UseGuards(JwtAuthGuard, RoleGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  @Get()
+  @Roles([Role.PENGURUS_INTI, Role.PJ])
+  async searchUser(
+    @Query('nama') nama?: string,
+    @Query('page', new ParseIntPipe({ optional: true })) page?: number,
+    @Query('size', new ParseIntPipe({ optional: true })) size?: number,
+  ): Promise<SuccessResponse<UserEntity[]>> {
+    const searchQuery: SearchUserDto = {
+      nama,
+      page: page ?? 1,
+      size: size ?? 10,
+    };
+    const result = await this.usersService.searchUser(searchQuery);
+    const users = result.users.map((user) => new UserEntity(user));
+    const paging = result.page;
+    return {
+      message: 'Success get users',
+      data: users,
+      page: paging,
+    };
+  }
 
   @Get('/:id')
   @Roles([Role.PENGURUS_INTI, Role.PJ])
