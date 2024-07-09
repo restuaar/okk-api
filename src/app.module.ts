@@ -7,6 +7,7 @@ import { validate } from 'env.validation';
 import { FilterModule } from './filter/filter.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { DivisionsModule } from './divisions/divisions.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { UsersModule } from './users/users.module';
     FilterModule,
     AuthModule,
     UsersModule,
+    DivisionsModule,
   ],
   controllers: [AppController],
 })

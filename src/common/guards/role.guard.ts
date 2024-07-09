@@ -14,7 +14,6 @@ export class RoleGuard implements CanActivate {
   ): boolean | Promise<boolean> | Observable<boolean> {
     const roles = this.reflector.get<Role[]>(Roles, context.getHandler());
     if (!roles) {
-      console.log('MASUK SINI YA');
       return true;
     }
 

@@ -43,9 +43,9 @@ model Panitia {
 
   kelompokOKK   KelompokOKK?
   
-  akun          Akun          @relation(fields: [username], references: [username])
-  divisi_pi      DivisiPI?     @relation(fields: [divisi_pi_id], references: [id])
-  divisi_bph     DivisiBPH?    @relation(fields: [divisi_bph_id], references: [id])
+  akun          Akun          @relation(fields: [username], references: [username], onDelete: Cascade, onUpdate: Cascade)
+  divisi_pi      DivisiPI?     @relation(fields: [divisi_pi_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  divisi_bph     DivisiBPH?    @relation(fields: [divisi_bph_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 enum TipeJabatan {
@@ -77,7 +77,7 @@ model DivisiBPH {
   panitia       Panitia[]
   rapat_bph     RapatBPH[]
 
-  divisi_pi     DivisiPI?      @relation(fields: [divisi_bagian], references: [nama])
+  divisi_pi     DivisiPI?      @relation(fields: [divisi_bagian], references: [nama], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model RapatBPH {
@@ -90,7 +90,7 @@ model RapatBPH {
   panitia_hadir PanitiaRapatBPH[]
 
   @@id([divisi_bph_id, waktu])
-  divisiBPH     DivisiBPH     @relation(fields: [divisi_bph_id], references: [id])
+  divisiBPH     DivisiBPH     @relation(fields: [divisi_bph_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model PanitiaRapatBPH {
@@ -101,8 +101,8 @@ model PanitiaRapatBPH {
   waktu_rapat       DateTime @db.Timestamp()
   divisi_bph_id     String 
 
-  panitia        Panitia  @relation(fields: [panitia_username], references: [username])
-  rapatBPH       RapatBPH @relation(fields: [waktu_rapat, divisi_bph_id], references: [waktu, divisi_bph_id])
+  panitia        Panitia  @relation(fields: [panitia_username], references: [username], onDelete: Cascade, onUpdate: Cascade)
+  rapatBPH       RapatBPH @relation(fields: [waktu_rapat, divisi_bph_id], references: [waktu, divisi_bph_id], onDelete: Cascade, onUpdate: Cascade)
 
   @@id([panitia_username, waktu_rapat, divisi_bph_id])
 }
@@ -117,7 +117,7 @@ model KelompokOKK {
   username_mentor String        @unique
   mentoring       Mentoring[]
 
-  mentor          Panitia       @relation(fields: [username_mentor], references: [username])
+  mentor          Panitia       @relation(fields: [username_mentor], references: [username], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model Mentee {
@@ -131,8 +131,8 @@ model Mentee {
 
   hadirMentoring MenteeMentoring[]
 
-  akun          Akun          @relation(fields: [username], references: [username])
-  kelompokOKK   KelompokOKK   @relation(fields: [no_kelompok_okk], references: [no])
+  akun          Akun          @relation(fields: [username], references: [username], onDelete: Cascade, onUpdate: Cascade)
+  kelompokOKK   KelompokOKK   @relation(fields: [no_kelompok_okk], references: [no], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model Mentoring {
@@ -144,7 +144,7 @@ model Mentoring {
   no_kelompok     Int           @db.SmallInt
   mentee_hadir    MenteeMentoring[]
 
-  kelompok_okk     KelompokOKK   @relation(fields: [no_kelompok], references: [no])
+  kelompok_okk     KelompokOKK   @relation(fields: [no_kelompok], references: [no], onDelete: Cascade, onUpdate: Cascade)
 
   @@id([no_kelompok, waktu])
 }
@@ -157,8 +157,8 @@ model MenteeMentoring {
   waktu_mentoring  DateTime @db.Timestamp()
   no_kelompok      Int
 
-  mentee        Mentee    @relation(fields: [mentee_username], references: [username])
-  mentoring     Mentoring @relation(fields: [waktu_mentoring, no_kelompok], references: [waktu, no_kelompok])
+  mentee        Mentee    @relation(fields: [mentee_username], references: [username], onDelete: Cascade, onUpdate: Cascade)
+  mentoring     Mentoring @relation(fields: [waktu_mentoring, no_kelompok], references: [waktu, no_kelompok], onDelete: Cascade, onUpdate: Cascade)
 
   @@id([mentee_username, waktu_mentoring, no_kelompok])
 }
@@ -185,7 +185,7 @@ model Sponsor {
 
   acara        AcaraSponsor[]
 
-  akun         Akun          @relation(fields: [username], references: [username])
+  akun         Akun          @relation(fields: [username], references: [username], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model AcaraSponsor {
@@ -195,8 +195,8 @@ model AcaraSponsor {
   id_sponsor    String       @db.VarChar(100)
   paket         PaketSponsor   
 
-  acara         Acara        @relation(fields: [id_acara], references: [id])
-  sponsor       Sponsor      @relation(fields: [id_sponsor], references: [username])
+  acara         Acara        @relation(fields: [id_acara], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  sponsor       Sponsor      @relation(fields: [id_sponsor], references: [username], onDelete: Cascade, onUpdate: Cascade)
 
   @@id([id_acara, id_sponsor])
 }
@@ -217,7 +217,7 @@ model Pembicara {
 
   acara        AcaraPembicara[]
 
-  akun         Akun          @relation(fields: [username], references: [username])
+  akun         Akun          @relation(fields: [username], references: [username], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model AcaraPembicara {
@@ -226,8 +226,8 @@ model AcaraPembicara {
   id_acara      String        @db.VarChar(100)
   id_pembicara  String        @db.VarChar(100)
 
-  acara        Acara          @relation(fields: [id_acara], references: [id])
-  pembicara    Pembicara      @relation(fields: [id_pembicara], references: [username])
+  acara        Acara          @relation(fields: [id_acara], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  pembicara    Pembicara      @relation(fields: [id_pembicara], references: [username], onDelete: Cascade, onUpdate: Cascade)
 
   @@id([id_acara, id_pembicara])
 }
