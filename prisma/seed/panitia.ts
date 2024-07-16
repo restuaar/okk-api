@@ -13,10 +13,8 @@ async function main() {
   console.log('Menghapus data panitia lama...');
   await prisma.panitia.deleteMany();
 
-  console.log('Menambahkan data panitia PI...');
-
+  console.log('Menambahkan data panitia PI baru...');
   const divisiPI = await prisma.divisiPI.findMany();
-
   const dataAkunPI = await prisma.akun.findMany({
     where: {
       AND: AKUN_KOSONG,
@@ -24,28 +22,24 @@ async function main() {
     take: divisiPI.length,
   });
 
-  const panitiaPIPromises = dataAkunPI.map((akun, index) => {
+  const panitiaPIRecords = dataAkunPI.map((akun, index) => {
     const dataRandom = getRandomFakultasJurusanAngkatan();
-    return prisma.panitia.upsert({
-      where: { username: akun.username },
-      update: {},
-      create: {
-        username: akun.username,
-        fakultas: dataRandom.fakultas,
-        jurusan: dataRandom.jurusan,
-        angkatan: dataRandom.angkatan,
-        divisi_pi_id: divisiPI[index].id,
-        jabatan: TipeJabatan.PENGURUS_INTI,
-      },
-    });
+    return {
+      username: akun.username,
+      fakultas: dataRandom.fakultas,
+      jurusan: dataRandom.jurusan,
+      angkatan: dataRandom.angkatan,
+      divisi_pi_id: divisiPI[index].id,
+      jabatan: TipeJabatan.PENGURUS_INTI,
+    };
   });
 
-  await Promise.all(panitiaPIPromises);
+  await prisma.panitia.createMany({
+    data: panitiaPIRecords,
+  });
 
-  console.log('Menambahkan data panitia BPH...');
-
+  console.log('Menambahkan data panitia BPH baru...');
   const divisiBPH = await prisma.divisiBPH.findMany();
-
   const dataAkunBPH = await prisma.akun.findMany({
     where: {
       AND: AKUN_KOSONG,
@@ -53,26 +47,23 @@ async function main() {
     take: divisiBPH.length * ANGGOTA_PER_DIVISI,
   });
 
-  const panitiaBPHPromises = dataAkunBPH.map((akun, index) => {
+  const panitiaBPHRecords = dataAkunBPH.map((akun, index) => {
     const divisi = divisiBPH[Math.floor(index / ANGGOTA_PER_DIVISI)];
-
     const dataRandom = getRandomFakultasJurusanAngkatan();
 
-    return prisma.panitia.upsert({
-      where: { username: akun.username },
-      update: {},
-      create: {
-        username: akun.username,
-        fakultas: dataRandom.fakultas,
-        jurusan: dataRandom.jurusan,
-        angkatan: dataRandom.angkatan,
-        divisi_bph_id: divisi.id,
-        jabatan: getJabatanByIndex(index),
-      },
-    });
+    return {
+      username: akun.username,
+      fakultas: dataRandom.fakultas,
+      jurusan: dataRandom.jurusan,
+      angkatan: dataRandom.angkatan,
+      divisi_bph_id: divisi.id,
+      jabatan: getJabatanByIndex(index),
+    };
   });
 
-  await Promise.all(panitiaBPHPromises);
+  await prisma.panitia.createMany({
+    data: panitiaBPHRecords,
+  });
 
   console.log('Seed panitia berhasil dijalankan!');
 }

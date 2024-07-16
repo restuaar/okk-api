@@ -17,11 +17,8 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Menjalankan seed sponsor...');
 
-  console.log('Menghapus data sponsor lama...');
   await prisma.acaraSponsor.deleteMany();
   await prisma.sponsor.deleteMany();
-
-  console.log('Menambahkan data sponsor...');
 
   const acara = await prisma.acara.findMany();
 
@@ -32,9 +29,7 @@ async function main() {
     take: BANYAK_SPONSOR,
   });
 
-  console.log('Update akun sponsor...');
-
-  const updateAkun = dataAkunSponsor.map((akun) => {
+  const updatedAkunPromises = dataAkunSponsor.map((akun) => {
     const namaSponsor = getRandomCompanyName();
     return prisma.akun.update({
       where: { username: akun.username },
@@ -45,51 +40,40 @@ async function main() {
     });
   });
 
-  dataAkunSponsor = await Promise.all(updateAkun);
+  dataAkunSponsor = await Promise.all(updatedAkunPromises);
 
-  const sponsorPromises = dataAkunSponsor.map(async (akun) => {
-    return prisma.sponsor.upsert({
-      where: { username: akun.username },
-      update: {},
-      create: {
-        username: akun.username,
-        kontak: getRandomKontak(),
-      },
-    });
+  const sponsorRecords = dataAkunSponsor.map((akun) => ({
+    username: akun.username,
+    kontak: getRandomKontak(),
+  }));
+
+  await prisma.sponsor.createMany({
+    data: sponsorRecords,
   });
 
-  await Promise.all(sponsorPromises);
-
-  const acaraSponsorPromises = acara.map(async (acara) => {
+  const acaraSponsorRecords = acara.flatMap((acaraItem) => {
     const randomBanyakSponsor = getRandomInt(SPONSOR_PER_ACARA, 1);
-    const sponsorIndex = [];
+    const sponsorIndex = new Set();
 
-    return Array.from({ length: randomBanyakSponsor }, async () => {
+    return Array.from({ length: randomBanyakSponsor }, () => {
       let randomSponsorIndex = getRandomInt(BANYAK_SPONSOR - 1);
-      while (sponsorIndex.includes(randomSponsorIndex)) {
+      while (sponsorIndex.has(randomSponsorIndex)) {
         randomSponsorIndex = getRandomInt(BANYAK_SPONSOR - 1);
       }
-      sponsorIndex.push(randomSponsorIndex);
+      sponsorIndex.add(randomSponsorIndex);
       const sponsor = dataAkunSponsor[randomSponsorIndex];
 
-      await prisma.acaraSponsor.upsert({
-        where: {
-          id_acara_id_sponsor: {
-            id_acara: acara.id,
-            id_sponsor: sponsor.username,
-          },
-        },
-        update: {},
-        create: {
-          id_acara: acara.id,
-          id_sponsor: sponsor.username,
-          paket: getPaketRandom(),
-        },
-      });
+      return {
+        id_acara: acaraItem.id,
+        id_sponsor: sponsor.username,
+        paket: getPaketRandom(),
+      };
     });
   });
 
-  await Promise.all(acaraSponsorPromises);
+  await prisma.acaraSponsor.createMany({
+    data: acaraSponsorRecords,
+  });
 
   console.log('Seed sponsor berhasil dijalankan!');
 }

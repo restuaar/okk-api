@@ -7,7 +7,6 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Menjalankan seed mentee...');
 
-  console.log('Menghapus data mentee lama...');
   await prisma.mentee.deleteMany();
 
   console.log('Menambahkan data mentee...');
@@ -21,24 +20,22 @@ async function main() {
     take: MENTEE_PER_KELOMPOK * dataKelompok.length,
   });
 
-  const menteePromises = dataAkunMentee.map((akun, index) => {
+  const menteeRecords = dataAkunMentee.map((akun, index) => {
     const kelompok = dataKelompok[Math.floor(index / MENTEE_PER_KELOMPOK)];
     const dataRandom = getRandomFakultasJurusanAngkatan();
 
-    return prisma.mentee.upsert({
-      where: { username: akun.username },
-      update: {},
-      create: {
-        username: akun.username,
-        fakultas: dataRandom.fakultas,
-        jurusan: dataRandom.jurusan,
-        angkatan: dataRandom.angkatan,
-        no_kelompok_okk: kelompok.no,
-      },
-    });
+    return {
+      username: akun.username,
+      fakultas: dataRandom.fakultas,
+      jurusan: dataRandom.jurusan,
+      angkatan: dataRandom.angkatan,
+      no_kelompok_okk: kelompok.no,
+    };
   });
 
-  await Promise.all(menteePromises);
+  await prisma.mentee.createMany({
+    data: menteeRecords,
+  });
 
   console.log('Seed mentee berhasil dijalankan!');
 }

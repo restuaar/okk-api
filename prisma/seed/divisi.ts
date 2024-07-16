@@ -6,42 +6,33 @@ const prisma = new PrismaClient();
 
 async function main() {
   console.log('Menjalankan seed divisi...');
+
   console.log('Menghapus data divisi lama...');
   await prisma.divisiBPH.deleteMany();
   await prisma.divisiPI.deleteMany();
 
-  console.log('Menambahkan data divisi PI...');
-  const divisiPIPromises = DIVISI.map((divisi) => {
-    const uuid = uuidv6();
-    return prisma.divisiPI.upsert({
-      where: { id: uuid },
-      update: {},
-      create: {
-        id: uuid,
-        nama: divisi.divisiPI,
-      },
-    });
+  console.log('Menambahkan data divisi PI baru...');
+  const divisiPIRecords = DIVISI.map((divisi) => ({
+    id: uuidv6(),
+    nama: divisi.divisiPI,
+  }));
+
+  await prisma.divisiPI.createMany({
+    data: divisiPIRecords,
   });
 
-  await Promise.all(divisiPIPromises);
+  console.log('Menambahkan data divisi BPH baru...');
+  const divisiBPHRecords = DIVISI.flatMap((divisi) =>
+    divisi.divisiBPH.map((bph) => ({
+      id: uuidv6(),
+      nama: bph,
+      divisi_bagian: divisi.divisiPI,
+    })),
+  );
 
-  console.log('Menambahkan data divisi BPH...');
-  const divisiBPHPromise = DIVISI.map((divisi) => {
-    return divisi.divisiBPH.map((bph) => {
-      const uuid = uuidv6();
-      return prisma.divisiBPH.upsert({
-        where: { id: uuid },
-        update: {},
-        create: {
-          id: uuid,
-          nama: bph,
-          divisi_bagian: divisi.divisiPI,
-        },
-      });
-    });
+  await prisma.divisiBPH.createMany({
+    data: divisiBPHRecords,
   });
-
-  await Promise.all(divisiBPHPromise.map((promise) => Promise.all(promise)));
 
   console.log('Seed divisi berhasil dijalankan!');
 }

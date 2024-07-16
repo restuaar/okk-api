@@ -6,7 +6,6 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Menjalankan seed kelompok OKK...');
 
-  console.log('Menghapus data kelompok OKK lama...');
   await prisma.kelompokOKK.deleteMany();
 
   console.log('Menambahkan data kelompok OKK...');
@@ -19,19 +18,15 @@ async function main() {
     },
   });
 
-  const kelompokOKKPromises = mentors.map((mentor, index) => {
-    return prisma.kelompokOKK.upsert({
-      where: { no: index + 1 },
-      update: {},
-      create: {
-        id: uuidv6(),
-        no: index + 1,
-        username_mentor: mentor.username,
-      },
-    });
-  });
+  const kelompokOKKRecords = mentors.map((mentor, index) => ({
+    id: uuidv6(),
+    no: index + 1,
+    username_mentor: mentor.username,
+  }));
 
-  await Promise.all(kelompokOKKPromises);
+  await prisma.kelompokOKK.createMany({
+    data: kelompokOKKRecords,
+  });
 
   console.log('Seed kelompok OKK berhasil dijalankan!');
 }

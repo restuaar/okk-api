@@ -20,61 +20,43 @@ async function main() {
 
   const divisiBPH = await prisma.divisiBPH.findMany();
 
-  const rapatBPHPromises = Array.from(
-    { length: BANYAK_RAPAT_BPH },
-    async () => {
-      const divisi = divisiBPH[getRandomInt(divisiBPH.length - 1)];
-      const waktu = getRandomWaktu();
-      return prisma.rapatBPH.upsert({
-        where: {
-          divisi_bph_id_waktu: {
-            divisi_bph_id: divisi.id,
-            waktu: waktu,
-          },
-        },
-        update: {},
-        create: {
-          waktu: waktu,
-          tempat: getRandomTempat(),
-          kesimpulan: getRandomKalimat(),
-          divisi_bph_id: divisi.id,
-        },
-      });
-    },
-  );
+  const rapatBPHRecords = Array.from({ length: BANYAK_RAPAT_BPH }, () => {
+    const divisi = divisiBPH[getRandomInt(divisiBPH.length - 1)];
+    const waktu = getRandomWaktu();
+    return {
+      waktu: waktu,
+      tempat: getRandomTempat(),
+      kesimpulan: getRandomKalimat(),
+      divisi_bph_id: divisi.id,
+    };
+  });
 
-  const rapatBPH = await Promise.all(rapatBPHPromises);
+  await prisma.rapatBPH.createMany({
+    data: rapatBPHRecords,
+  });
 
-  console.log('Menjalankan seed anggota rapat BPH...');
+  console.log('Menambahkan anggota rapat BPH...');
 
-  for (const rapat of rapatBPH) {
+  const panitiaPromises = rapatBPHRecords.map(async (rapat) => {
     const panitiaDivisi = await prisma.panitia.findMany({
       where: {
         divisi_bph_id: rapat.divisi_bph_id,
       },
     });
 
-    const panitiaPromise = panitiaDivisi.map((panitia) => {
-      return prisma.panitiaRapatBPH.upsert({
-        where: {
-          panitia_username_waktu_rapat_divisi_bph_id: {
-            panitia_username: panitia.username,
-            waktu_rapat: rapat.waktu,
-            divisi_bph_id: rapat.divisi_bph_id,
-          },
-        },
-        update: {},
-        create: {
-          panitia_username: panitia.username,
-          waktu_hadir: getRandomWaktu(rapat.waktu),
-          waktu_rapat: rapat.waktu,
-          divisi_bph_id: rapat.divisi_bph_id,
-        },
-      });
-    });
+    return panitiaDivisi.map((panitia) => ({
+      panitia_username: panitia.username,
+      waktu_hadir: getRandomWaktu(rapat.waktu),
+      waktu_rapat: rapat.waktu,
+      divisi_bph_id: rapat.divisi_bph_id,
+    }));
+  });
 
-    await Promise.all(panitiaPromise);
-  }
+  const panitiaRapatBPHRecords = (await Promise.all(panitiaPromises)).flat();
+
+  await prisma.panitiaRapatBPH.createMany({
+    data: panitiaRapatBPHRecords,
+  });
 
   console.log('Seed rapat BPH berhasil dijalankan!');
 }

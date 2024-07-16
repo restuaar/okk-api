@@ -11,7 +11,6 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Menjalankan seed pembicara...');
 
-  console.log('Menghapus data pembicara lama...');
   await prisma.acaraPembicara.deleteMany();
   await prisma.pembicara.deleteMany();
 
@@ -26,50 +25,37 @@ async function main() {
     take: BANYAK_PEMBICARA,
   });
 
-  const pembicaraPromises = dataAkunPembicara.map(async (akun) => {
-    return prisma.pembicara.upsert({
-      where: { username: akun.username },
-      update: {},
-      create: {
-        username: akun.username,
-        kontak: getRandomKontak(),
-      },
-    });
+  const pembicaraRecords = dataAkunPembicara.map((akun) => ({
+    username: akun.username,
+    kontak: getRandomKontak(),
+  }));
+
+  await prisma.pembicara.createMany({
+    data: pembicaraRecords,
   });
 
-  await Promise.all(pembicaraPromises);
-
-  const acaraPembicaraPromises = acara.map((acara) => {
+  const acaraPembicaraRecords = acara.flatMap((acaraItem) => {
     const randomBanyakPembicara = getRandomInt(PEMBICARA_PER_ACARA, 1);
-    const pembicaraIndex = [];
+    const pembicaraIndex = new Set();
 
     return Array.from({ length: randomBanyakPembicara }, () => {
       let randomPembicaraIndex = getRandomInt(BANYAK_PEMBICARA - 1);
-      while (pembicaraIndex.includes(randomPembicaraIndex)) {
+      while (pembicaraIndex.has(randomPembicaraIndex)) {
         randomPembicaraIndex = getRandomInt(BANYAK_PEMBICARA - 1);
       }
-      pembicaraIndex.push(randomPembicaraIndex);
+      pembicaraIndex.add(randomPembicaraIndex);
       const pembicara = dataAkunPembicara[randomPembicaraIndex];
 
-      return prisma.acaraPembicara.upsert({
-        where: {
-          id_acara_id_pembicara: {
-            id_acara: acara.id,
-            id_pembicara: pembicara.username,
-          },
-        },
-        update: {},
-        create: {
-          id_acara: acara.id,
-          id_pembicara: pembicara.username,
-        },
-      });
+      return {
+        id_acara: acaraItem.id,
+        id_pembicara: pembicara.username,
+      };
     });
   });
 
-  await Promise.all(
-    acaraPembicaraPromises.map((promises) => Promise.all(promises)),
-  );
+  await prisma.acaraPembicara.createMany({
+    data: acaraPembicaraRecords,
+  });
 
   console.log('Seed pembicara berhasil dijalankan!');
 }

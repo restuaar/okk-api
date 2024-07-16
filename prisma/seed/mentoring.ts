@@ -19,63 +19,44 @@ async function main() {
 
   const kelompokOKK = await prisma.kelompokOKK.findMany();
 
-  const mentoringPromises = kelompokOKK.map((kelompok) => {
-    return Array.from({ length: MENTORING_PER_KELOMPOK }, async () => {
+  const mentoringData = kelompokOKK.flatMap((kelompok) =>
+    Array.from({ length: MENTORING_PER_KELOMPOK }).map(() => {
       const waktu = getRandomWaktu();
-      return prisma.mentoring.upsert({
-        where: {
-          no_kelompok_waktu: {
-            no_kelompok: kelompok.no,
-            waktu: waktu,
-          },
-        },
-        update: {},
-        create: {
-          waktu: waktu,
-          tempat: getRandomTempat(),
-          materi: getRandomMateri(),
-          no_kelompok: kelompok.no,
-        },
-      });
-    });
+      return {
+        waktu,
+        tempat: getRandomTempat(),
+        materi: getRandomMateri(),
+        no_kelompok: kelompok.no,
+      };
+    }),
+  );
+
+  await prisma.mentoring.createMany({
+    data: mentoringData,
   });
 
-  const mentoringPerKelompok = await Promise.all(
-    mentoringPromises.map((promise) => Promise.all(promise)),
-  );
+  console.log('Menambahkan data mentee mentoring...');
 
-  const mentoringMenteePromises = mentoringPerKelompok.map(
-    async (mentoringKelompok) => {
-      return mentoringKelompok.map(async (mentoring) => {
-        const mentee = await prisma.mentee.findMany({
-          where: {
-            no_kelompok_okk: mentoring.no_kelompok,
-          },
+  const menteeMentoringData = (
+    await Promise.all(
+      mentoringData.map(async (mentoring) => {
+        const mentees = await prisma.mentee.findMany({
+          where: { no_kelompok_okk: mentoring.no_kelompok },
         });
 
-        return mentee.map(async (mentee) => {
-          return prisma.menteeMentoring.upsert({
-            where: {
-              mentee_username_waktu_mentoring_no_kelompok: {
-                mentee_username: mentee.username,
-                waktu_mentoring: mentoring.waktu,
-                no_kelompok: mentoring.no_kelompok,
-              },
-            },
-            update: {},
-            create: {
-              mentee_username: mentee.username,
-              waktu_hadir: getRandomWaktu(mentoring.waktu),
-              waktu_mentoring: mentoring.waktu,
-              no_kelompok: mentoring.no_kelompok,
-            },
-          });
-        });
-      });
-    },
-  );
+        return mentees.map((mentee) => ({
+          mentee_username: mentee.username,
+          waktu_hadir: getRandomWaktu(mentoring.waktu),
+          waktu_mentoring: mentoring.waktu,
+          no_kelompok: mentoring.no_kelompok,
+        }));
+      }),
+    )
+  ).flat();
 
-  await Promise.all(mentoringMenteePromises);
+  await prisma.menteeMentoring.createMany({
+    data: menteeMentoringData,
+  });
 
   console.log('Seed mentoring berhasil dijalankan!');
 }

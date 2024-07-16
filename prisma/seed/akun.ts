@@ -11,18 +11,21 @@ async function main(): Promise<void> {
   console.log('Menghapus data akun lama...');
   await prisma.akun.deleteMany();
 
-  const userPromises = Array.from({ length: USER_NUMBER }, async () => {
-    const user = await createRandomUser();
-    return prisma.akun.upsert({
-      where: { username: user.username },
-      update: {},
-      create: user,
-    });
-  });
+  const userRecords = await Promise.all(
+    Array.from({ length: USER_NUMBER }, async () => {
+      const user = await createRandomUser();
+      return {
+        id: uuidv6(),
+        username: user.username,
+        password: await hash(user.password, ROUND_OF_SALT),
+        nama: user.nama,
+      };
+    }),
+  );
 
-  await Promise.all(userPromises);
+  await prisma.akun.createMany({ data: userRecords });
 
-  // Akun untuk testing
+  // Menambahkan akun testing
   await prisma.akun.upsert({
     where: { username: 'restuaar' },
     update: {},
@@ -33,6 +36,7 @@ async function main(): Promise<void> {
       nama: 'Restu Ahmad Ar Ridho',
     },
   });
+
   console.log('Seed akun berhasil dijalankan!');
 }
 

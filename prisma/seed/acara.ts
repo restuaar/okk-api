@@ -7,28 +7,22 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Menjalankan seed acara...');
 
-  console.log('Menghapus data acara lama...');
   await prisma.acara.deleteMany();
 
   console.log('Menambahkan data acara...');
 
-  const acaraPromises = ACARA.map(async (acara) => {
-    const uuid = uuidv6();
-    return prisma.acara.upsert({
-      where: { id: uuid },
-      update: {},
-      create: {
-        id: uuid,
-        nama: acara.nama,
-        tempat: acara.tempat,
-        waktu_mulai: acara.waktuMulai,
-        waktu_selesai: acara.waktuSelesai,
-        deskripsi: acara.deskripsi,
-      },
-    });
-  });
+  const acaraRecords = ACARA.map((acara) => ({
+    id: uuidv6(),
+    nama: acara.nama,
+    tempat: acara.tempat,
+    waktu_mulai: acara.waktuMulai,
+    waktu_selesai: acara.waktuSelesai,
+    deskripsi: acara.deskripsi,
+  }));
 
-  await Promise.all(acaraPromises);
+  await prisma.acara.createMany({
+    data: acaraRecords,
+  });
 
   console.log('Seed acara berhasil dijalankan!');
 }
