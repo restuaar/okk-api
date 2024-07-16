@@ -22,27 +22,32 @@ export class UsersService {
     searchQuery: SearchUserDto,
   ): Promise<{ users: UserEntity[]; page: Page }> {
     this.logger.log('Search user', 'UsersService');
-    const result = await this.prismaService.akun.findMany({
-      where: {
-        nama: {
-          contains: searchQuery.nama,
-        },
-      },
-      skip: (searchQuery.page - 1) * searchQuery.size,
-      take: searchQuery.size,
-    });
 
-    const totalData = await this.prismaService.akun.count({
-      where: {
-        nama: {
-          contains: searchQuery.nama,
+    const { nama, page, size } = searchQuery;
+
+    const [result, totalData] = await Promise.all([
+      this.prismaService.akun.findMany({
+        where: {
+          nama: {
+            contains: nama,
+          },
         },
-      },
-    });
+        skip: (page - 1) * size,
+        take: size,
+      }),
+      this.prismaService.akun.count({
+        where: {
+          nama: {
+            contains: nama,
+          },
+        },
+      }),
+    ]);
 
     const usersWithRole = await Promise.all(
       result.map((user) => this.getUser(user.id)),
     );
+
     const users = usersWithRole.map((user) => ({
       ...user,
       role: user.role,
@@ -51,25 +56,28 @@ export class UsersService {
     return {
       users,
       page: {
-        current_page: searchQuery.page,
-        total_page: Math.ceil(totalData / searchQuery.size),
-        size: searchQuery.size,
+        current_page: page,
+        total_page: Math.ceil(totalData / size),
+        size,
         total_size: totalData,
       },
     };
   }
 
-  async getUser(unique: string): Promise<UserEntity | any> {
+  async getUser(unique: string): Promise<UserEntity> {
     this.logger.log(`Get user ${unique}`, 'UsersService');
+
     const isId = isUUID(unique);
     const roleUser = await this.prismaService.getRoleUser(unique, isId);
     const user = await this.prismaService.akun.findUnique({
       where: isId ? { id: unique } : { username: unique },
       include: roleUser.type,
     });
+
     if (!user) {
       throw new NotFoundException('User not found');
     }
+
     return {
       ...user,
       role: roleUser.role,
@@ -82,6 +90,7 @@ export class UsersService {
       `Create user with username ${createUserDto.username}`,
       'UsersService',
     );
+
     const user = await this.prismaService.akun.create({
       data: {
         ...createUserDto,
@@ -89,15 +98,17 @@ export class UsersService {
         password: await hash(createUserDto.password, ROUND_OF_SALT),
       },
     });
+
     const roleUser = await this.prismaService.getRoleUser(user.username);
+
     return {
       ...user,
       role: roleUser.role,
     };
   }
 
-  async createManyUser(createUserDto: CreateUserDto[]): Promise<UserEntity[]> {
-    const usersPromise = createUserDto.map(async (user) => {
+  async createManyUser(createUserDtos: CreateUserDto[]): Promise<UserEntity[]> {
+    const usersPromise = createUserDtos.map(async (user) => {
       this.logger.log(
         `Create user with username ${user.username}`,
         'UsersService',
@@ -108,13 +119,16 @@ export class UsersService {
         password: await hash(user.password, ROUND_OF_SALT),
       };
     });
+
     const users = await Promise.all(usersPromise);
     const createdUsers = await this.prismaService.akun.createManyAndReturn({
       data: users,
     });
+
     const roleUsers = await Promise.all(
       createdUsers.map((user) => this.prismaService.getRoleUser(user.username)),
     );
+
     return createdUsers.map((user, index) => ({
       ...user,
       role: roleUsers[index].role,
@@ -126,6 +140,7 @@ export class UsersService {
     updateUserDto: UpdateUserDto,
   ): Promise<UserEntity> {
     this.logger.log(`Update user ${unique}`, 'UsersService');
+
     const user = await this.getUser(unique);
     const userUpdated = await this.prismaService.akun.update({
       where: { id: user.id },
@@ -147,11 +162,13 @@ export class UsersService {
 
   async deleteUser(unique: string): Promise<UserEntity> {
     this.logger.log(`Delete user ${unique}`, 'UsersService');
+
     const user = await this.getUser(unique);
     await this.prismaService.akun.delete({
       where: { id: user.id },
       include: user.type,
     });
+
     return {
       ...user,
       role: user.role,

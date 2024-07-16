@@ -40,8 +40,8 @@ export class UsersController {
   @Get()
   @Roles([Role.PENGURUS_INTI, Role.PJ])
   @ApiQuery({ name: 'nama', required: false, type: String })
-  @ApiQuery({ name: 'page', required: false, type: String })
-  @ApiQuery({ name: 'size', required: false, type: String })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'size', required: false, type: Number })
   @ApiOkResponse({
     description: 'Success get users',
     schema: createResponseSchema(UserEntity, true),
@@ -52,11 +52,7 @@ export class UsersController {
     @Query('page', new ParseIntPipe({ optional: true })) page: number = 1,
     @Query('size', new ParseIntPipe({ optional: true })) size: number = 10,
   ): Promise<SuccessResponse<UserEntity[]>> {
-    const searchQuery: SearchUserDto = {
-      nama,
-      page,
-      size,
-    };
+    const searchQuery: SearchUserDto = { nama, page, size };
     const result = await this.usersService.searchUser(searchQuery);
     const users = result.users.map((user) => new UserEntity(user));
     const paging = result.page;
@@ -114,16 +110,16 @@ export class UsersController {
   @Post('/batch')
   @Roles([Role.PENGURUS_INTI, Role.PJ])
   @ApiCreatedResponse({
-    description: 'Success create user',
+    description: 'Success create users',
     schema: createResponseSchema(UserEntity, true),
     isArray: true,
   })
   @ApiBody({ type: [CreateUserDto] })
-  async createManyUser(@Body() createUserDto: CreateUserDto[]) {
-    const users = await this.usersService.createManyUser(createUserDto);
+  async createManyUser(@Body() createUserDtos: CreateUserDto[]) {
+    const users = await this.usersService.createManyUser(createUserDtos);
     const usersEntity = users.map((user) => new UserEntity(user));
     return {
-      message: 'Success create user',
+      message: 'Success create users',
       data: usersEntity,
     };
   }
