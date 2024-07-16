@@ -1,4 +1,4 @@
-import { PartialType } from '@nestjs/swagger';
+import { ApiProperty, PartialType } from '@nestjs/swagger';
 import {
   CreatePIDivisionDto,
   CreateBPHDivisionDto,
@@ -7,8 +7,9 @@ import { IsNotEmpty, IsOptional, IsUUID } from 'class-validator';
 
 export class UpdateDivisionPIDto extends PartialType(CreatePIDivisionDto) {
   @IsUUID()
-  @IsOptional()
   @IsNotEmpty()
-  pengurus: string;
+  @IsOptional()
+  @ApiProperty({ required: false })
+  username_pengurus?: string;
 }
 export class UpdateDivisionBPHDto extends PartialType(CreateBPHDivisionDto) {}

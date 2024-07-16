@@ -1,5 +1,28 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { DivisiBPH, DivisiPI, Panitia, RapatBPH } from '@prisma/client';
+import {
+  DivisiBPHType,
+  PanitiaType,
+  RapatBPHType,
+} from 'src/interfaces/type-api.interface';
+
+export class DivisionPI implements DivisiPI {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty()
+  nama: string;
+
+  @ApiProperty({ required: false, type: () => PanitiaType })
+  pengurus?: Panitia;
+
+  @ApiProperty({
+    isArray: true,
+    required: false,
+    type: () => DivisiBPHType,
+  })
+  divisiKoor?: DivisiBPH[];
+}
 
 export class DivisionBPH implements DivisiBPH {
   @ApiProperty()
@@ -11,26 +34,20 @@ export class DivisionBPH implements DivisiBPH {
   @ApiProperty()
   divisi_bagian: string;
 
-  @ApiProperty()
-  divisi_pi: DivisionPI;
+  @ApiProperty({ required: false, nullable: true })
+  divisi_pi?: DivisionPI;
 
-  @ApiProperty()
-  panitia: Panitia[];
+  @ApiProperty({
+    isArray: true,
+    required: false,
+    type: () => PanitiaType,
+  })
+  panitia?: Panitia[];
 
-  @ApiProperty()
-  rapat: RapatBPH[];
-}
-
-export class DivisionPI implements DivisiPI {
-  @ApiProperty()
-  id: string;
-
-  @ApiProperty()
-  nama: string;
-
-  @ApiProperty()
-  pengurus: Panitia;
-
-  @ApiProperty()
-  divisiKoor: DivisionBPH[];
+  @ApiProperty({
+    isArray: true,
+    required: false,
+    type: () => RapatBPHType,
+  })
+  rapat?: RapatBPH[];
 }

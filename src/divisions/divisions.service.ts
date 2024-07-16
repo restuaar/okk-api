@@ -13,6 +13,9 @@ import { v6 as uuidv6 } from 'uuid';
 import { UpdateDivisionPIDto } from './dto/update-division.dto';
 import { SearchDivisionDto } from './dto/search-division.dto';
 import { getPaginationData } from 'src/utils/get-pagination';
+import { Page } from 'src/dto/success.dto';
+import { DivisionPI } from './entities/division.entity';
+import { TipeJabatan } from '@prisma/client';
 
 @Injectable()
 export class DivisionsService {
@@ -21,7 +24,10 @@ export class DivisionsService {
     private readonly logger: LoggerService,
   ) {}
 
-  async getAllPIDivisions(searchDivisionDto: SearchDivisionDto) {
+  async getAllPIDivisions(searchDivisionDto: SearchDivisionDto): Promise<{
+    data: DivisionPI[] | any;
+    page: Page | { divisi_pi: Page; divisi_bph: Page };
+  }> {
     const { option, onlyPI, onlyBPH, nama, page, size } = searchDivisionDto;
 
     if (onlyPI && onlyBPH) {
@@ -118,19 +124,13 @@ export class DivisionsService {
     };
   }
 
-  async getPIDivision(
-    id: string,
-    option: { includePengurus: boolean; includeDivisi: boolean } = {
-      includePengurus: false,
-      includeDivisi: false,
-    },
-  ) {
+  async getPIDivision(id: string): Promise<DivisionPI> {
     this.logger.log(`Fetching PI Division with id ${id}`);
     const division = await this.prismaService.divisiPI.findUnique({
       where: { id },
       include: {
-        pengurus: option.includePengurus,
-        divisiKoor: option.includeDivisi,
+        pengurus: true,
+        divisiKoor: true,
       },
     });
 
@@ -208,11 +208,39 @@ export class DivisionsService {
   ) {
     this.logger.log(`Updating PI Division with id ${id}`, 'DivisionsService');
     const division = await this.getPIDivision(id);
+    const currentPengurus = await this.prismaService.panitia.findUnique({
+      where: { username: division.pengurus.username },
+    });
+
+    if (updatePIDivisionDto.username_pengurus) {
+      const newPengurus = await this.prismaService.panitia.findUnique({
+        where: { username: updatePIDivisionDto.username_pengurus },
+      });
+
+      if (!newPengurus) {
+        throw new BadRequestException('Pengurus doesnt exist');
+      }
+
+      if (newPengurus.divisi_pi_id) {
+        throw new BadRequestException('Pengurus already has a division');
+      }
+
+      await this.prismaService.panitia.update({
+        where: { username: division.pengurus.username },
+        data: { jabatan: TipeJabatan.PENGURUS_INTI },
+      });
+    }
 
     return await this.prismaService.divisiPI.update({
       where: { id },
       data: {
         nama: updatePIDivisionDto.nama ?? division.nama,
+        pengurus: {
+          connect: {
+            username:
+              updatePIDivisionDto.username_pengurus ?? currentPengurus.username,
+          },
+        },
       },
       include: {
         pengurus: option.includePengurus,
@@ -264,10 +292,7 @@ export class DivisionsService {
 
   async deletePIDivision(id: string) {
     this.logger.log(`Deleting PI Division with id ${id}`, 'DivisionsService');
-    const division = await this.getPIDivision(id, {
-      includeDivisi: true,
-      includePengurus: true,
-    });
+    const division = await this.getPIDivision(id);
 
     await this.prismaService.divisiPI.delete({ where: { id } });
 
