@@ -35,11 +35,16 @@ export class AuthService {
       include: roleUser.type,
     });
     if (!user) {
+      this.logger.warn(`User not found: ${username}`, 'AuthService');
       throw new UnauthorizedException('Invalid credentials');
     }
 
     const isPasswordMatch = await compare(passwordReq, user.password);
     if (!isPasswordMatch) {
+      this.logger.warn(
+        `Password mismatch for user: ${username}`,
+        'AuthService',
+      );
       throw new UnauthorizedException('Invalid credentials');
     }
 
@@ -60,6 +65,7 @@ export class AuthService {
       include: roleUser.type,
     });
     if (!user) {
+      this.logger.warn(`User not found: ${id}`, 'AuthService');
       throw new UnauthorizedException('Invalid credentials');
     }
 
@@ -70,7 +76,7 @@ export class AuthService {
   }
 
   async register(user: RegisterRequestDto): Promise<UserEntity> {
-    this.logger.log(`Register with user ${user.username}`, 'AuthService');
+    this.logger.log(`Registering user ${user.username}`, 'AuthService');
 
     const userCreated = await this.prismaService.akun.create({
       data: {
@@ -85,7 +91,7 @@ export class AuthService {
   }
 
   async login(user: UserEntity): Promise<AuthResponse> {
-    this.logger.log(`Login with user ${user.username}`, 'AuthService');
+    this.logger.log(`Logging in user ${user.username}`, 'AuthService');
 
     const payload: PayloadAuth = { sub: user.id };
     await this.prismaService.refreshToken.deleteMany({
@@ -97,7 +103,7 @@ export class AuthService {
   }
 
   async logout(user: UserEntity): Promise<UserEntity> {
-    this.logger.log(`Logout with user ${user.username}`, 'AuthService');
+    this.logger.log(`Logging out user ${user.username}`, 'AuthService');
 
     await this.prismaService.refreshToken.deleteMany({
       where: {
@@ -111,13 +117,12 @@ export class AuthService {
     user: UserEntity,
     updateUser: UpdateUserDto,
   ): Promise<UserEntity> {
-    this.logger.log(`Update user with id ${user.id}`, 'AuthService');
+    this.logger.log(`Updating profile for user ${user.id}`, 'AuthService');
 
     const roleUser = await this.prismaService.getRoleUser(user.username);
     const userUpdated = await this.prismaService.akun.update({
       where: {
         id: user.id,
-        username: user.username,
       },
       data: {
         username: updateUser.username ?? user.username,
@@ -133,10 +138,7 @@ export class AuthService {
   }
 
   async handleRefreshToken(refreshToken: string): Promise<AuthResponse> {
-    this.logger.log(
-      `Handle refresh token with refresh token ${refreshToken} `,
-      'AuthService',
-    );
+    this.logger.log(`Handling refresh token`, 'AuthService');
 
     try {
       const payload = this.jwtService.verify(refreshToken, {
@@ -149,6 +151,10 @@ export class AuthService {
         },
       });
       if (!token) {
+        this.logger.warn(
+          `Invalid token for user: ${payload.sub}`,
+          'AuthService',
+        );
         throw new UnauthorizedException('Invalid token');
       }
       return await this.generateToken({ sub: payload.sub });

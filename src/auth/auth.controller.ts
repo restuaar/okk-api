@@ -164,6 +164,7 @@ export class AuthController {
     const refreshToken = req.signedCookies.refreshToken;
 
     if (!refreshToken) {
+      this.logger.warn(`Refresh token not found`, 'AuthController');
       throw new UnauthorizedException('Refresh token not found');
     }
 
@@ -192,6 +193,7 @@ export class AuthController {
       sameSite: 'strict',
       maxAge: jwtConvertTime(timeJwt),
       path: '/api/v1/auth/refresh-token',
+      secure: this.configService.get<string>('NODE_ENV') === 'production',
     });
   }
 
@@ -200,6 +202,7 @@ export class AuthController {
       httpOnly: true,
       sameSite: 'strict',
       path: '/api/v1/auth/refresh-token',
+      secure: this.configService.get<string>('NODE_ENV') === 'production',
     });
   }
 }
