@@ -10,6 +10,7 @@ import { validate as isUUID } from 'uuid';
 import { UserEntity } from './entities/user.entity';
 import { SearchUserDto } from './dto/search-user.dto';
 import { Page } from 'src/dto/success.dto';
+import { getPaginationData } from 'src/utils/get-pagination';
 
 @Injectable()
 export class UsersService {
@@ -55,12 +56,7 @@ export class UsersService {
 
     return {
       users,
-      page: {
-        current_page: page,
-        total_page: Math.ceil(totalData / size),
-        size,
-        total_size: totalData,
-      },
+      page: getPaginationData(page, size, totalData),
     };
   }
 

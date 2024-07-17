@@ -18,7 +18,7 @@ import {
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RoleGuard } from 'src/common/guards/role.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
-import { Role } from 'src/interfaces/user.interface';
+import { Role } from 'src/interfaces/users.interface';
 import { UpdateDivisionPIDto } from './dto/update-division.dto';
 import { LoggerService } from 'src/common/logger/logger.service';
 import {

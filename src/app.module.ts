@@ -8,6 +8,7 @@ import { FilterModule } from './filter/filter.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { DivisionsModule } from './divisions/divisions.module';
+import { OrganizersModule } from './organizers/organizers.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { DivisionsModule } from './divisions/divisions.module';
     AuthModule,
     UsersModule,
     DivisionsModule,
+    OrganizersModule,
   ],
   controllers: [AppController],
 })
