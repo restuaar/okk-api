@@ -14,8 +14,13 @@ import { UpdateDivisionPIDto } from './dto/update-division.dto';
 import { SearchDivisionDto } from './dto/search-division.dto';
 import { getPaginationData } from 'src/utils/get-pagination';
 import { Page } from 'src/dto/success.dto';
-import { DivisionPI } from './entities/division.entity';
+import { DivisionBPH, DivisionPI } from './entities/division.entity';
 import { TipeJabatan } from '@prisma/client';
+import {
+  BPHDivisionOptions,
+  PIDivisionOptions,
+  SearchDivisionOptions,
+} from 'src/interfaces/options.interface';
 
 @Injectable()
 export class DivisionsService {
@@ -24,11 +29,18 @@ export class DivisionsService {
     private readonly logger: LoggerService,
   ) {}
 
-  async getAllPIDivisions(searchDivisionDto: SearchDivisionDto): Promise<{
-    data: DivisionPI[] | any;
+  async searchDivisions(
+    searchDivisionDto: SearchDivisionDto,
+    options: SearchDivisionOptions,
+  ): Promise<{
+    data: {
+      divisi_pi?: DivisionPI[];
+      divisi_bph?: DivisionBPH[];
+    };
     page: Page | { divisi_pi: Page; divisi_bph: Page };
   }> {
-    const { option, onlyPI, onlyBPH, nama, page, size } = searchDivisionDto;
+    const { onlyPI, onlyBPH, nama, page, size } = searchDivisionDto;
+    const { PI, BPH } = options;
 
     if (onlyPI && onlyBPH) {
       this.logger.warn(
@@ -51,8 +63,8 @@ export class DivisionsService {
       const divisionsPI = await this.prismaService.divisiPI.findMany({
         ...baseOptions,
         include: {
-          pengurus: option.includePengurus,
-          divisiKoor: option.includeDivisi,
+          pengurus: PI.includePengurus,
+          divisiKoor: PI.includeDivisi,
         },
       });
 
@@ -61,7 +73,9 @@ export class DivisionsService {
       });
 
       return {
-        data: divisionsPI,
+        data: {
+          divisi_pi: divisionsPI,
+        },
         page: getPaginationData(page, size, totalDataPI),
       };
     }
@@ -71,9 +85,9 @@ export class DivisionsService {
       const divisionsBPH = await this.prismaService.divisiBPH.findMany({
         ...baseOptions,
         include: {
-          panitia: option.includeAnggota,
-          divisi_pi: option.includeDivisi,
-          rapat_bph: option.includeRapat,
+          panitia: BPH.includeAnggota,
+          divisi_pi: BPH.includeDivisi,
+          rapat_bph: BPH.includeRapat,
         },
       });
 
@@ -82,7 +96,9 @@ export class DivisionsService {
       });
 
       return {
-        data: divisionsBPH,
+        data: {
+          divisi_bph: divisionsBPH,
+        },
         page: getPaginationData(page, size, totalDataBPH),
       };
     }
@@ -96,17 +112,17 @@ export class DivisionsService {
         this.prismaService.divisiPI.findMany({
           ...baseOptions,
           include: {
-            pengurus: option.includePengurus,
-            divisiKoor: option.includeDivisi,
+            pengurus: PI.includePengurus,
+            divisiKoor: PI.includeDivisi,
           },
         }),
         this.prismaService.divisiPI.count({ where: baseOptions.where }),
         this.prismaService.divisiBPH.findMany({
           ...baseOptions,
           include: {
-            panitia: option.includeAnggota,
-            divisi_pi: option.includeDivisi,
-            rapat_bph: option.includeRapat,
+            panitia: BPH.includeAnggota,
+            divisi_pi: BPH.includeDivisi,
+            rapat_bph: BPH.includeRapat,
           },
         }),
         this.prismaService.divisiBPH.count({ where: baseOptions.where }),
@@ -124,13 +140,16 @@ export class DivisionsService {
     };
   }
 
-  async getPIDivision(id: string): Promise<DivisionPI> {
+  async getPIDivision(
+    id: string,
+    options: PIDivisionOptions,
+  ): Promise<DivisionPI> {
     this.logger.log(`Fetching PI Division with id ${id}`);
     const division = await this.prismaService.divisiPI.findUnique({
       where: { id },
       include: {
-        pengurus: true,
-        divisiKoor: true,
+        pengurus: options.includePengurus,
+        divisiKoor: options.includeDivisi,
       },
     });
 
@@ -145,25 +164,14 @@ export class DivisionsService {
     return division;
   }
 
-  async getBPHDivision(
-    id: string,
-    option: {
-      includeAnggota: boolean;
-      includeDivisi: boolean;
-      includeRapat: boolean;
-    } = {
-      includeAnggota: false,
-      includeDivisi: false,
-      includeRapat: false,
-    },
-  ) {
+  async getBPHDivision(id: string, options: BPHDivisionOptions) {
     this.logger.log(`Fetching BPH Division with id ${id}`);
     const division = await this.prismaService.divisiBPH.findUnique({
       where: { id },
       include: {
-        panitia: option.includeAnggota,
-        divisi_pi: option.includeDivisi,
-        rapat_bph: option.includeRapat,
+        panitia: options.includeAnggota,
+        divisi_pi: options.includeDivisi,
+        rapat_bph: options.includeRapat,
       },
     });
 
@@ -201,13 +209,13 @@ export class DivisionsService {
   async updatePIDivision(
     id: string,
     updatePIDivisionDto: UpdateDivisionPIDto,
-    option: { includePengurus: boolean; includeDivisi: boolean } = {
-      includePengurus: false,
-      includeDivisi: false,
-    },
+    options: PIDivisionOptions,
   ) {
     this.logger.log(`Updating PI Division with id ${id}`, 'DivisionsService');
-    const division = await this.getPIDivision(id);
+    const division = await this.getPIDivision(id, {
+      includeDivisi: false,
+      includePengurus: false,
+    });
     const currentPengurus = await this.prismaService.panitia.findUnique({
       where: { username: division.pengurus.username },
     });
@@ -243,8 +251,8 @@ export class DivisionsService {
         },
       },
       include: {
-        pengurus: option.includePengurus,
-        divisiKoor: option.includeDivisi,
+        pengurus: options.includePengurus,
+        divisiKoor: options.includeDivisi,
       },
     });
   }
@@ -252,15 +260,7 @@ export class DivisionsService {
   async updateBPHDivision(
     id: string,
     updateBPHDivisionDto: CreateBPHDivisionDto,
-    option: {
-      includeAnggota: boolean;
-      includeDivisi: boolean;
-      includeRapat: boolean;
-    } = {
-      includeAnggota: false,
-      includeDivisi: false,
-      includeRapat: false,
-    },
+    options: BPHDivisionOptions,
   ) {
     this.logger.log(`Updating BPH Division with id ${id}`, 'DivisionsService');
     const division = await this.prismaService.divisiBPH.findUnique({
@@ -283,29 +283,25 @@ export class DivisionsService {
           updateBPHDivisionDto.divisi_bagian ?? division.divisi_bagian,
       },
       include: {
-        panitia: option.includeAnggota,
-        divisi_pi: option.includeDivisi,
-        rapat_bph: option.includeRapat,
+        panitia: options.includeAnggota,
+        divisi_pi: options.includeDivisi,
+        rapat_bph: options.includeRapat,
       },
     });
   }
 
-  async deletePIDivision(id: string) {
+  async deletePIDivision(id: string, options: PIDivisionOptions) {
     this.logger.log(`Deleting PI Division with id ${id}`, 'DivisionsService');
-    const division = await this.getPIDivision(id);
+    const division = await this.getPIDivision(id, options);
 
     await this.prismaService.divisiPI.delete({ where: { id } });
 
     return division;
   }
 
-  async deleteBPHDivision(id: string) {
+  async deleteBPHDivision(id: string, options: BPHDivisionOptions) {
     this.logger.log(`Deleting BPH Division with id ${id}`, 'DivisionsService');
-    const division = await this.getBPHDivision(id, {
-      includeAnggota: true,
-      includeDivisi: true,
-      includeRapat: true,
-    });
+    const division = await this.getBPHDivision(id, options);
 
     await this.prismaService.divisiBPH.delete({ where: { id } });
 

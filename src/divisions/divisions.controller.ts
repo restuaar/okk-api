@@ -40,18 +40,72 @@ export class DivisionsController {
     private readonly logger: LoggerService,
   ) {}
 
+  @Get()
+  @Roles([Role.PENGURUS_INTI, Role.PJ])
+  @ApiQuery({ name: 'nama', required: false, type: String })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'size', required: false, type: Number })
+  @ApiQuery({ name: 'onlyPI', required: false, type: Boolean })
+  @ApiQuery({ name: 'onlyBPH', required: false, type: Boolean })
+  @ApiOkResponse({
+    description: 'Success get divisions',
+    type: () => [DivisionPI, DivisionBPH],
+  })
+  async getDivisions(
+    @Query('nama') nama: string,
+    @Query('page') page: number = 1,
+    @Query('size') size: number = 10,
+    @Query('onlyPI', new ParseBoolPipe({ optional: true })) onlyPI: boolean,
+    @Query('onlyBPH', new ParseBoolPipe({ optional: true })) onlyBPH: boolean,
+    @Query('includePengurus', new ParseBoolPipe({ optional: true }))
+    includePengurus: boolean,
+    @Query('includeAnggota', new ParseBoolPipe({ optional: true }))
+    includeAnggota: boolean,
+    @Query('includeDivisi', new ParseBoolPipe({ optional: true }))
+    includeDivisi: boolean,
+    @Query('includeRapat', new ParseBoolPipe({ optional: true }))
+    includeRapat: boolean,
+  ) {
+    this.logger.log('Fetching divisions', 'DivisionsController');
+    const searchDivisionDto = { nama, page, size, onlyPI, onlyBPH };
+    const options = {
+      PI: { includePengurus, includeDivisi },
+      BPH: { includeAnggota, includeDivisi, includeRapat },
+    };
+    const divisions = await this.divisionsService.searchDivisions(
+      searchDivisionDto,
+      options,
+    );
+
+    return {
+      message: 'Get divisions success',
+      data: divisions,
+    };
+  }
+
   @Get('/pi/:id')
   @Roles([Role.PENGURUS_INTI])
+  @ApiQuery({ name: 'includePengurus', required: false, type: Boolean })
+  @ApiQuery({ name: 'includeDivisi', required: false, type: Boolean })
   @ApiOkResponse({
     description: 'Success get PI Division',
     type: DivisionPI,
   })
-  async getPIDivision(@Param('id') id: string) {
+  async getPIDivision(
+    @Param('id') id: string,
+    @Query('includePengurus', new ParseBoolPipe({ optional: true }))
+    includePengurus: boolean = true,
+    @Query('includeDivisi', new ParseBoolPipe({ optional: true }))
+    includeDivisi: boolean = false,
+  ) {
     this.logger.log(
       `Fetching PI Division with id ${id}`,
       'DivisionsController',
     );
-    const division = await this.divisionsService.getPIDivision(id);
+    const division = await this.divisionsService.getPIDivision(id, {
+      includePengurus,
+      includeDivisi,
+    });
     return {
       message: 'Get PI Division success',
       data: division,
@@ -138,7 +192,7 @@ export class DivisionsController {
     @Param('id') id: string,
     @Body() updateDivisionPIDto: UpdateDivisionPIDto,
     @Query('includePengurus', new ParseBoolPipe({ optional: true }))
-    includePengurus: boolean = false,
+    includePengurus: boolean = true,
     @Query('includeDivisi', new ParseBoolPipe({ optional: true }))
     includeDivisi: boolean = false,
   ) {
@@ -195,16 +249,27 @@ export class DivisionsController {
 
   @Delete('/pi/:id')
   @Roles([Role.PENGURUS_INTI])
+  @ApiQuery({ name: 'includeDivisi', required: false, type: Boolean })
+  @ApiQuery({ name: 'includePengurus', required: false, type: Boolean })
   @ApiOkResponse({
     description: 'Success delete PI Division',
     type: DivisionPI,
   })
-  async deletePIDivision(@Param('id') id: string) {
+  async deletePIDivision(
+    @Param('id') id: string,
+    @Query('includePengurus', new ParseBoolPipe({ optional: true }))
+    includePengurus: boolean = true,
+    @Query('includeDivisi', new ParseBoolPipe({ optional: true }))
+    includeDivisi: boolean = false,
+  ) {
     this.logger.log(
       `Deleting PI Division with id ${id}`,
       'DivisionsController',
     );
-    const division = await this.divisionsService.deletePIDivision(id);
+    const division = await this.divisionsService.deletePIDivision(id, {
+      includePengurus,
+      includeDivisi,
+    });
 
     return {
       message: 'Delete PI Division success',
@@ -214,16 +279,31 @@ export class DivisionsController {
 
   @Delete('/bph/:id')
   @Roles([Role.PENGURUS_INTI, Role.PJ])
+  @ApiQuery({ name: 'includeAnggota', required: false, type: Boolean })
+  @ApiQuery({ name: 'includeDivisi', required: false, type: Boolean })
+  @ApiQuery({ name: 'includeRapat', required: false, type: Boolean })
   @ApiOkResponse({
     description: 'Success delete BPH Division',
     type: DivisionBPH,
   })
-  async deleteBPHDivision(@Param('id') id: string) {
+  async deleteBPHDivision(
+    @Param('id') id: string,
+    @Query('includeAnggota', new ParseBoolPipe({ optional: true }))
+    includeAnggota: boolean = false,
+    @Query('includeDivisi', new ParseBoolPipe({ optional: true }))
+    includeDivisi: boolean = false,
+    @Query('includeRapat', new ParseBoolPipe({ optional: true }))
+    includeRapat: boolean = false,
+  ) {
     this.logger.log(
       `Deleting BPH Division with id ${id}`,
       'DivisionsController',
     );
-    const division = await this.divisionsService.deleteBPHDivision(id);
+    const division = await this.divisionsService.deleteBPHDivision(id, {
+      includeAnggota,
+      includeDivisi,
+      includeRapat,
+    });
 
     return {
       message: 'Delete BPH Division success',

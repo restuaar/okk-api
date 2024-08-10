@@ -4,12 +4,4 @@ export class SearchDivisionDto {
   size?: number;
   onlyPI?: boolean;
   onlyBPH?: boolean;
-  option?: OptionSearchDivision;
-}
-
-class OptionSearchDivision {
-  includePengurus?: boolean;
-  includeDivisi?: boolean;
-  includeRapat?: boolean;
-  includeAnggota?: boolean;
 }
