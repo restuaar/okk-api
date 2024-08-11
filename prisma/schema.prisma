@@ -83,28 +83,30 @@ model DivisiBPH {
 model RapatBPH {
   @@map("rapat_bph")
 
+  id            String        @default(uuid())
   waktu         DateTime      @db.Timestamp()
   tempat        String        @db.VarChar(255)
   kesimpulan    String        @db.Text
   divisi_bph_id String
   panitia_hadir PanitiaRapatBPH[]
 
-  @@id([divisi_bph_id, waktu])
+  @@id([divisi_bph_id, id])
   divisiBPH     DivisiBPH     @relation(fields: [divisi_bph_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model PanitiaRapatBPH {
   @@map("panitia_rapat_bph")
 
+  rapat_id          String   @db.VarChar(100)
   panitia_username  String   @db.VarChar(100)
   waktu_hadir       DateTime @db.Timestamp()
   waktu_rapat       DateTime @db.Timestamp()
   divisi_bph_id     String 
 
   panitia        Panitia  @relation(fields: [panitia_username], references: [username], onDelete: Cascade, onUpdate: Cascade)
-  rapatBPH       RapatBPH @relation(fields: [waktu_rapat, divisi_bph_id], references: [waktu, divisi_bph_id], onDelete: Cascade, onUpdate: Cascade)
+  rapatBPH       RapatBPH @relation(fields: [rapat_id, divisi_bph_id], references: [id, divisi_bph_id], onDelete: Cascade, onUpdate: Cascade)
 
-  @@id([panitia_username, waktu_rapat, divisi_bph_id])
+  @@id([panitia_username, divisi_bph_id, rapat_id])
 }
 
 model KelompokOKK {

@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { BANYAK_RAPAT_BPH } from './utils/constant';
+import { v6 as uuidv6 } from 'uuid';
 import {
   getRandomInt,
   getRandomKalimat,
@@ -21,9 +22,11 @@ async function main() {
   const divisiBPH = await prisma.divisiBPH.findMany();
 
   const rapatBPHRecords = Array.from({ length: BANYAK_RAPAT_BPH }, () => {
+    const id = uuidv6();
     const divisi = divisiBPH[getRandomInt(divisiBPH.length - 1)];
     const waktu = getRandomWaktu();
     return {
+      id,
       waktu: waktu,
       tempat: getRandomTempat(),
       kesimpulan: getRandomKalimat(),
@@ -45,6 +48,7 @@ async function main() {
     });
 
     return panitiaDivisi.map((panitia) => ({
+      rapat_id: rapat.id,
       panitia_username: panitia.username,
       waktu_hadir: getRandomWaktu(rapat.waktu),
       waktu_rapat: rapat.waktu,
