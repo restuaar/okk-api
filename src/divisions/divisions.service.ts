@@ -81,7 +81,10 @@ export class DivisionsService {
     }
 
     if (onlyBPH) {
-      this.logger.log('Fetching BPH Divisions with filters', '');
+      this.logger.log(
+        'Fetching BPH Divisions with filters',
+        'DivisionsService',
+      );
       const divisionsBPH = await this.prismaService.divisiBPH.findMany({
         ...baseOptions,
         include: {
@@ -140,6 +143,34 @@ export class DivisionsService {
     };
   }
 
+  async getPIDivisions(
+    searchDto: SearchDivisionDto,
+    options: PIDivisionOptions,
+  ): Promise<{
+    data: DivisionPI[];
+    page: Page;
+  }> {
+    this.logger.log('Fetching all PI Divisions', 'DivisionsService');
+    const piDivision = await this.prismaService.divisiPI.findMany({
+      where: {
+        nama: { contains: searchDto.nama },
+      },
+      include: {
+        pengurus: options.includePengurus,
+        divisiKoor: options.includeDivisi,
+      },
+      take: searchDto.size,
+      skip: (searchDto.page - 1) * searchDto.size,
+    });
+    const totalData = await this.prismaService.divisiPI.count({
+      where: { nama: { contains: searchDto.nama } },
+    });
+    return {
+      data: piDivision,
+      page: getPaginationData(searchDto.page, searchDto.size, totalData),
+    };
+  }
+
   async getPIDivision(
     id: string,
     options: PIDivisionOptions,
@@ -162,6 +193,35 @@ export class DivisionsService {
     }
 
     return division;
+  }
+
+  async getBPHDivisions(
+    searchDto: SearchDivisionDto,
+    options: BPHDivisionOptions,
+  ): Promise<{
+    data: DivisionBPH[];
+    page: Page;
+  }> {
+    this.logger.log('Fetching all PI Divisions', 'DivisionsService');
+    const bphDivisions = await this.prismaService.divisiBPH.findMany({
+      where: {
+        nama: { contains: searchDto.nama },
+      },
+      include: {
+        divisi_pi: options.includeDivisi,
+        panitia: options.includeAnggota,
+        rapat_bph: options.includeRapat,
+      },
+      take: searchDto.size,
+      skip: (searchDto.page - 1) * searchDto.size,
+    });
+    const totalData = await this.prismaService.divisiBPH.count({
+      where: { nama: { contains: searchDto.nama } },
+    });
+    return {
+      data: bphDivisions,
+      page: getPaginationData(searchDto.page, searchDto.size, totalData),
+    };
   }
 
   async getBPHDivision(id: string, options: BPHDivisionOptions) {

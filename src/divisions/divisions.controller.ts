@@ -50,6 +50,7 @@ export class DivisionsController {
   @ApiOkResponse({
     description: 'Success get divisions',
     type: () => [DivisionPI, DivisionBPH],
+    isArray: true,
   })
   async getDivisions(
     @Query('nama') nama: string,
@@ -83,6 +84,41 @@ export class DivisionsController {
     };
   }
 
+  @Get('/pi')
+  @Roles([Role.PENGURUS_INTI, Role.PJ])
+  @ApiQuery({ name: 'nama', required: false, type: String })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'size', required: false, type: Number })
+  @ApiQuery({ name: 'includePengurus', required: false, type: Boolean })
+  @ApiQuery({ name: 'includeDivisi', required: false, type: Boolean })
+  @ApiOkResponse({
+    description: 'Success get PI divisions',
+    type: DivisionPI,
+    isArray: true,
+  })
+  async getPIDivisions(
+    @Query('nama') nama: string,
+    @Query('page') page: number = 1,
+    @Query('size') size: number = 10,
+    @Query('includePengurus', new ParseBoolPipe({ optional: true }))
+    includePengurus: boolean = true,
+    @Query('includeDivisi', new ParseBoolPipe({ optional: true }))
+    includeDivisi: boolean = false,
+  ) {
+    this.logger.log('Fetching PI divisions', 'DivisionsController');
+    const searchDivisionDto = { nama, page, size };
+    const options = { includePengurus, includeDivisi };
+    const divisions = await this.divisionsService.getPIDivisions(
+      searchDivisionDto,
+      options,
+    );
+
+    return {
+      message: 'Get PI divisions success',
+      data: divisions,
+    };
+  }
+
   @Get('/pi/:id')
   @Roles([Role.PENGURUS_INTI])
   @ApiQuery({ name: 'includePengurus', required: false, type: Boolean })
@@ -109,6 +145,44 @@ export class DivisionsController {
     return {
       message: 'Get PI Division success',
       data: division,
+    };
+  }
+
+  @Get('/bph')
+  @Roles([Role.PENGURUS_INTI, Role.PJ])
+  @ApiQuery({ name: 'nama', required: false, type: String })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'size', required: false, type: Number })
+  @ApiQuery({ name: 'includeAnggota', required: false, type: Boolean })
+  @ApiQuery({ name: 'includeDivisi', required: false, type: Boolean })
+  @ApiQuery({ name: 'includeRapat', required: false, type: Boolean })
+  @ApiOkResponse({
+    description: 'Success get BPH divisions',
+    type: DivisionBPH,
+    isArray: true,
+  })
+  async getBPHDivisions(
+    @Query('nama') nama: string,
+    @Query('page') page: number = 1,
+    @Query('size') size: number = 10,
+    @Query('includeAnggota', new ParseBoolPipe({ optional: true }))
+    includeAnggota: boolean = false,
+    @Query('includeDivisi', new ParseBoolPipe({ optional: true }))
+    includeDivisi: boolean = false,
+    @Query('includeRapat', new ParseBoolPipe({ optional: true }))
+    includeRapat: boolean = false,
+  ) {
+    this.logger.log('Fetching BPH divisions', 'DivisionsController');
+    const searchDivisionDto = { nama, page, size };
+    const options = { includeAnggota, includeDivisi, includeRapat };
+    const divisions = await this.divisionsService.getBPHDivisions(
+      searchDivisionDto,
+      options,
+    );
+
+    return {
+      message: 'Get BPH divisions success',
+      data: divisions,
     };
   }
 
