@@ -28,7 +28,10 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { DivisionBPH, DivisionPI } from './entities/division.entity';
+import {
+  DivisionBPHEntity,
+  DivisionPIEntity,
+} from './entities/division.entity';
 
 @ApiTags('Divisions')
 @ApiBearerAuth()
@@ -47,9 +50,11 @@ export class DivisionsController {
   @ApiQuery({ name: 'size', required: false, type: Number })
   @ApiQuery({ name: 'onlyPI', required: false, type: Boolean })
   @ApiQuery({ name: 'onlyBPH', required: false, type: Boolean })
+  @ApiQuery({ name: 'includePengurus', required: false, type: Boolean })
+  @ApiQuery({ name: 'includeAnggota', required: false, type: Boolean })
   @ApiOkResponse({
     description: 'Success get divisions',
-    type: () => [DivisionPI, DivisionBPH],
+    type: () => [DivisionPIEntity, DivisionBPHEntity],
     isArray: true,
   })
   async getDivisions(
@@ -93,7 +98,7 @@ export class DivisionsController {
   @ApiQuery({ name: 'includeDivisi', required: false, type: Boolean })
   @ApiOkResponse({
     description: 'Success get PI divisions',
-    type: DivisionPI,
+    type: DivisionPIEntity,
     isArray: true,
   })
   async getPIDivisions(
@@ -115,7 +120,8 @@ export class DivisionsController {
 
     return {
       message: 'Get PI divisions success',
-      data: divisions,
+      data: divisions.data,
+      page: divisions.page,
     };
   }
 
@@ -125,7 +131,7 @@ export class DivisionsController {
   @ApiQuery({ name: 'includeDivisi', required: false, type: Boolean })
   @ApiOkResponse({
     description: 'Success get PI Division',
-    type: DivisionPI,
+    type: DivisionPIEntity,
   })
   async getPIDivision(
     @Param('id') id: string,
@@ -158,7 +164,7 @@ export class DivisionsController {
   @ApiQuery({ name: 'includeRapat', required: false, type: Boolean })
   @ApiOkResponse({
     description: 'Success get BPH divisions',
-    type: DivisionBPH,
+    type: DivisionBPHEntity,
     isArray: true,
   })
   async getBPHDivisions(
@@ -193,7 +199,7 @@ export class DivisionsController {
   @ApiQuery({ name: 'includeRapat', required: false, type: Boolean })
   @ApiOkResponse({
     description: 'Success get BPH Division',
-    type: DivisionBPH,
+    type: DivisionBPHEntity,
   })
   async getBPHDivision(
     @Param('id') id: string,
@@ -224,7 +230,7 @@ export class DivisionsController {
   @Roles([Role.PENGURUS_INTI])
   @ApiCreatedResponse({
     description: 'Success create PI Division',
-    type: DivisionPI,
+    type: DivisionPIEntity,
   })
   async createPIDivision(@Body() createDivisionPIDto: CreatePIDivisionDto) {
     this.logger.log('Creating new PI Division', 'DivisionsController');
@@ -241,7 +247,7 @@ export class DivisionsController {
   @Roles([Role.PENGURUS_INTI, Role.PJ])
   @ApiCreatedResponse({
     description: 'Success create BPH Division',
-    type: DivisionBPH,
+    type: DivisionBPHEntity,
   })
   async createBPHDivision(@Body() createDivisionBPHDto: CreateBPHDivisionDto) {
     this.logger.log('Creating new BPH Division', 'DivisionsController');
@@ -260,7 +266,7 @@ export class DivisionsController {
   @ApiQuery({ name: 'includePengurus', required: false, type: Boolean })
   @ApiOkResponse({
     description: 'Success update PI Division',
-    type: DivisionPI,
+    type: DivisionPIEntity,
   })
   async updatePIDivision(
     @Param('id') id: string,
@@ -293,7 +299,7 @@ export class DivisionsController {
   @ApiQuery({ name: 'includeRapat', required: false, type: Boolean })
   @ApiOkResponse({
     description: 'Success update BPH Division',
-    type: DivisionBPH,
+    type: DivisionBPHEntity,
   })
   async updateBPHDivision(
     @Param('id') id: string,
@@ -327,7 +333,7 @@ export class DivisionsController {
   @ApiQuery({ name: 'includePengurus', required: false, type: Boolean })
   @ApiOkResponse({
     description: 'Success delete PI Division',
-    type: DivisionPI,
+    type: DivisionPIEntity,
   })
   async deletePIDivision(
     @Param('id') id: string,
@@ -358,7 +364,7 @@ export class DivisionsController {
   @ApiQuery({ name: 'includeRapat', required: false, type: Boolean })
   @ApiOkResponse({
     description: 'Success delete BPH Division',
-    type: DivisionBPH,
+    type: DivisionBPHEntity,
   })
   async deleteBPHDivision(
     @Param('id') id: string,

@@ -6,7 +6,7 @@ import {
   RapatBPHType,
 } from 'src/interfaces/type-api.interface';
 
-export class DivisionPI implements DivisiPI {
+export class DivisionPIEntity implements DivisiPI {
   @ApiProperty()
   id: string;
 
@@ -24,7 +24,7 @@ export class DivisionPI implements DivisiPI {
   divisiKoor?: DivisiBPH[];
 }
 
-export class DivisionBPH implements DivisiBPH {
+export class DivisionBPHEntity implements DivisiBPH {
   @ApiProperty()
   id: string;
 
@@ -35,7 +35,7 @@ export class DivisionBPH implements DivisiBPH {
   divisi_bagian: string;
 
   @ApiProperty({ required: false, nullable: true })
-  divisi_pi?: DivisionPI;
+  divisi_pi?: DivisionPIEntity;
 
   @ApiProperty({
     isArray: true,

@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Akun, Mentee, Panitia, Pembicara, Sponsor } from '@prisma/client';
 import { Exclude } from 'class-transformer';
-import { Role, TypeUser } from 'src/interfaces/user.interface';
+import { Role, TypeUser } from 'src/interfaces/users.interface';
 
 export class UserEntity implements Akun {
   constructor(partial: Partial<UserEntity>) {

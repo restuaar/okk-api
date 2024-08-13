@@ -63,6 +63,8 @@ export class DivisiBPHType implements DivisiBPH {
 
 export class RapatBPHType implements RapatBPH {
   @ApiProperty()
+  id: string;
+  @ApiProperty()
   waktu: Date;
   @ApiProperty()
   tempat: string;
@@ -73,6 +75,8 @@ export class RapatBPHType implements RapatBPH {
 }
 
 export class PanitiaRapatBPHType implements PanitiaRapatBPH {
+  @ApiProperty()
+  rapat_id: string;
   @ApiProperty()
   panitia_username: string;
   @ApiProperty()

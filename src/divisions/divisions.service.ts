@@ -14,7 +14,10 @@ import { UpdateDivisionPIDto } from './dto/update-division.dto';
 import { SearchDivisionDto } from './dto/search-division.dto';
 import { getPaginationData } from 'src/utils/get-pagination';
 import { Page } from 'src/dto/success.dto';
-import { DivisionBPH, DivisionPI } from './entities/division.entity';
+import {
+  DivisionBPHEntity,
+  DivisionPIEntity,
+} from './entities/division.entity';
 import { TipeJabatan } from '@prisma/client';
 import {
   BPHDivisionOptions,
@@ -34,8 +37,8 @@ export class DivisionsService {
     options: SearchDivisionOptions,
   ): Promise<{
     data: {
-      divisi_pi?: DivisionPI[];
-      divisi_bph?: DivisionBPH[];
+      divisi_pi?: DivisionPIEntity[];
+      divisi_bph?: DivisionBPHEntity[];
     };
     page: Page | { divisi_pi: Page; divisi_bph: Page };
   }> {
@@ -147,7 +150,7 @@ export class DivisionsService {
     searchDto: SearchDivisionDto,
     options: PIDivisionOptions,
   ): Promise<{
-    data: DivisionPI[];
+    data: DivisionPIEntity[];
     page: Page;
   }> {
     this.logger.log('Fetching all PI Divisions', 'DivisionsService');
@@ -174,7 +177,7 @@ export class DivisionsService {
   async getPIDivision(
     id: string,
     options: PIDivisionOptions,
-  ): Promise<DivisionPI> {
+  ): Promise<DivisionPIEntity> {
     this.logger.log(`Fetching PI Division with id ${id}`);
     const division = await this.prismaService.divisiPI.findUnique({
       where: { id },
@@ -199,7 +202,7 @@ export class DivisionsService {
     searchDto: SearchDivisionDto,
     options: BPHDivisionOptions,
   ): Promise<{
-    data: DivisionBPH[];
+    data: DivisionBPHEntity[];
     page: Page;
   }> {
     this.logger.log('Fetching all PI Divisions', 'DivisionsService');

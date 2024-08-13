@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { DivisionsModule } from './divisions/divisions.module';
 import { OrganizersModule } from './organizers/organizers.module';
+import { MeetingsModule } from './meetings/meetings.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { OrganizersModule } from './organizers/organizers.module';
     UsersModule,
     DivisionsModule,
     OrganizersModule,
+    MeetingsModule,
   ],
   controllers: [AppController],
 })
