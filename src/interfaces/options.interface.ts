@@ -18,3 +18,9 @@ export class OrganizerOptions {
   includeRapat: boolean = false;
   includeDivisi: boolean = false;
 }
+
+export class GroupOptions {
+  includeMentor: boolean = true;
+  includeAnggota: boolean = false;
+  includeMentoring: boolean = false;
+}
