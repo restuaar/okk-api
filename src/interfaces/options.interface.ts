@@ -30,3 +30,8 @@ export class MenteeOptions {
   includeGroup: boolean = true;
   includeMentoring: boolean = false;
 }
+
+export class EventOptions {
+  includePembicara: boolean = false;
+  includeSponsor: boolean = false;
+}
