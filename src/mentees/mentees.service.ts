@@ -4,7 +4,7 @@ import { LoggerService } from 'src/common/logger/logger.service';
 import { MenteeOptions } from 'src/interfaces/options.interface';
 import { MenteeEntity } from './entities/mentee.entity';
 import { CreateMenteeDto } from './dto/create-mentee.dto';
-import { SearchMenteeDto } from './dto/searh-mentee.dto';
+import { SearchMenteeDto } from './dto/search-mentee.dto';
 import { getPaginationData } from 'src/utils/get-pagination';
 import { Page } from 'src/dto/success.dto';
 
@@ -32,7 +32,7 @@ export class MenteesService {
       ],
     };
     const [result, totalData] = await Promise.all([
-      await this.prismaService.mentee.findMany({
+      this.prismaService.mentee.findMany({
         where: filterOptions,
         include: {
           akun: options.includeAkun,
@@ -42,7 +42,7 @@ export class MenteesService {
         skip: (page - 1) * size,
         take: size,
       }),
-      await this.prismaService.mentee.count({ where: filterOptions }),
+      this.prismaService.mentee.count({ where: filterOptions }),
     ]);
 
     return {

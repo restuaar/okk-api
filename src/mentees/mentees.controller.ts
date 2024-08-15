@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Param,
   Patch,
   Post,
   Query,
@@ -10,12 +11,18 @@ import {
 } from '@nestjs/common';
 import { MenteesService } from './mentees.service';
 import { LoggerService } from 'src/common/logger/logger.service';
-import { ApiBearerAuth, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RoleGuard } from 'src/common/guards/role.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { Role } from 'src/interfaces/users.interface';
-import { SearchMenteeDto } from './dto/searh-mentee.dto';
+import { SearchMenteeDto } from './dto/search-mentee.dto';
 import { MenteeEntity } from './entities/mentee.entity';
 import { CreateMenteeDto } from './dto/create-mentee.dto';
 
@@ -75,7 +82,7 @@ export class MenteesController {
     type: MenteeEntity,
   })
   async getMentee(
-    @Query('username') username: string,
+    @Param('username') username: string,
     @Query('includeAkun') includeAkun: boolean = false,
     @Query('includeMentoring') includeMentoring: boolean = false,
     @Query('includeGroup') includeGroup: boolean = false,
@@ -108,12 +115,14 @@ export class MenteesController {
 
   @Patch('/:username')
   @Roles([Role.PENGURUS_INTI, Role.PJ, Role.PANITIA, Role.MENTEE])
+  @ApiQuery({ name: 'includeAkun', required: false, type: Boolean })
+  @ApiQuery({ name: 'includeMentoring', required: false, type: Boolean })
   @ApiResponse({
     description: 'Success update mentee',
     type: MenteeEntity,
   })
   async updateMentee(
-    @Query('username') username: string,
+    @Param('username') username: string,
     @Body() updateMenteeDto: CreateMenteeDto,
     @Query('includeAkun') includeAkun: boolean = false,
     @Query('includeMentoring') includeMentoring: boolean = false,
@@ -135,12 +144,16 @@ export class MenteesController {
 
   @Delete('/:username')
   @Roles([Role.PENGURUS_INTI, Role.PJ, Role.PANITIA])
+  @ApiParam({ name: 'username', type: String })
+  @ApiQuery({ name: 'includeAkun', required: false, type: Boolean })
+  @ApiQuery({ name: 'includeMentoring', required: false, type: Boolean })
+  @ApiQuery({ name: 'includeGroup', required: false, type: Boolean })
   @ApiResponse({
     description: 'Success delete mentee',
     type: MenteeEntity,
   })
   async deleteMentee(
-    @Query('username') username: string,
+    @Param('username') username: string,
     @Query('includeAkun') includeAkun: boolean = false,
     @Query('includeMentoring') includeMentoring: boolean = false,
     @Query('includeGroup') includeGroup: boolean = false,
