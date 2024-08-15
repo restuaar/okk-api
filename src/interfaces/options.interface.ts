@@ -24,3 +24,9 @@ export class GroupOptions {
   includeAnggota: boolean = false;
   includeMentoring: boolean = false;
 }
+
+export class MenteeOptions {
+  includeAkun: boolean = false;
+  includeGroup: boolean = true;
+  includeMentoring: boolean = false;
+}

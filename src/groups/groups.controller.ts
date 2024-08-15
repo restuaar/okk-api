@@ -64,7 +64,7 @@ export class GroupsController {
     };
   }
 
-  @Get(':no')
+  @Get('/:no')
   @Roles([Role.PENGURUS_INTI, Role.PJ, Role.PANITIA, Role.MENTEE])
   @ApiQuery({ name: 'includeMentor', required: false, type: Boolean })
   @ApiQuery({ name: 'includeAnggota', required: false, type: Boolean })
@@ -144,7 +144,7 @@ export class GroupsController {
     };
   }
 
-  @Patch(':no')
+  @Patch('/:no')
   @Roles([Role.PENGURUS_INTI, Role.PJ, Role.PANITIA])
   @ApiQuery({ name: 'includeMentor', required: false, type: Boolean })
   @ApiQuery({ name: 'includeAnggota', required: false, type: Boolean })
@@ -177,7 +177,7 @@ export class GroupsController {
     };
   }
 
-  @Delete(':no')
+  @Delete('/:no')
   @Roles([Role.PENGURUS_INTI, Role.PJ, Role.PANITIA])
   @ApiQuery({ name: 'includeMentor', required: false, type: Boolean })
   @ApiQuery({ name: 'includeAnggota', required: false, type: Boolean })
