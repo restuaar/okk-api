@@ -12,6 +12,7 @@ import { OrganizersModule } from './organizers/organizers.module';
 import { MeetingsModule } from './meetings/meetings.module';
 import { GroupsModule } from './groups/groups.module';
 import { MenteesModule } from './mentees/mentees.module';
+import { MentoringsModule } from './mentorings/mentorings.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { MenteesModule } from './mentees/mentees.module';
     MeetingsModule,
     GroupsModule,
     MenteesModule,
+    MentoringsModule,
   ],
   controllers: [AppController],
 })

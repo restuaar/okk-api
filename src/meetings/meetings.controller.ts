@@ -104,6 +104,7 @@ export class MeetingsController {
 
   @Post('/:divisionId')
   @Roles([Role.PENGURUS_INTI, Role.PJ])
+  @ApiParam({ name: 'divisionId', required: true })
   @ApiResponse({
     description: 'Success create meeting',
     type: MeetingEntity,
@@ -201,7 +202,7 @@ export class MeetingsController {
     @Param('meetingId') meetingId: string,
     @Body('username') username: string,
   ) {
-    const meeting = await this.meetingsService.addAttendance(
+    const meeting = await this.meetingsService.addAttendee(
       divisionId,
       meetingId,
       username,
@@ -226,7 +227,7 @@ export class MeetingsController {
     @Param('meetingId') meetingId: string,
     @Body('username') username: string,
   ) {
-    const meeting = await this.meetingsService.deleteAttendance(
+    const meeting = await this.meetingsService.removeAttendee(
       divisionId,
       meetingId,
       username,

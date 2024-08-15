@@ -1,20 +1,20 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsDateString, IsNotEmpty, IsString, MaxLength } from 'class-validator';
 
-export class CreateMeetingDto {
-  @ApiProperty()
+export class CreateMentoringDto {
   @IsDateString()
   @IsNotEmpty()
+  @ApiProperty()
   waktu: string;
 
-  @ApiProperty()
   @IsString()
   @IsNotEmpty()
   @MaxLength(255)
+  @ApiProperty()
   tempat: string;
 
-  @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  kesimpulan: string;
+  @ApiProperty()
+  materi: string;
 }

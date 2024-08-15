@@ -115,6 +115,13 @@ export class MeetingsService {
 
     const meeting = await this.getMeeting(divisionId, meetingId);
 
+    if (updateMeetingDto.waktu) {
+      const date = Date.parse(updateMeetingDto.waktu);
+      if (isNaN(date)) {
+        throw new BadRequestException('Invalid date');
+      }
+    }
+
     return await this.prismaService.rapatBPH.update({
       where: {
         divisi_bph_id_id: {
@@ -140,7 +147,7 @@ export class MeetingsService {
   async deleteMeetings(divisionId: string): Promise<MeetingEntity[]> {
     this.logger.log('Delete meeting', 'MeetingsService');
 
-    const meeting = await this.getMeetings(divisionId, null);
+    const meeting = await this.getMeetings(divisionId);
 
     await this.prismaService.rapatBPH.deleteMany({
       where: {
@@ -171,7 +178,7 @@ export class MeetingsService {
     return meeting;
   }
 
-  async addAttendance(
+  async addAttendee(
     divisionId: string,
     meetingId: string,
     username: string,
@@ -185,14 +192,29 @@ export class MeetingsService {
       throw new BadRequestException('Meeting has not started');
     }
 
-    const panitiaRapat = await this.prismaService.panitiaRapatBPH.findFirst({
+    const panitia = await this.prismaService.panitia.findUnique({
       where: {
-        rapat_id: meeting.id,
-        panitia_username: username,
+        username,
+        divisi_bph_id: divisionId,
+      },
+    });
+    if (!panitia) {
+      throw new BadRequestException(
+        'Panitia not found or not in this division',
+      );
+    }
+
+    const panitiaRapat = await this.prismaService.panitiaRapatBPH.findUnique({
+      where: {
+        panitia_username_divisi_bph_id_rapat_id: {
+          panitia_username: username,
+          divisi_bph_id: divisionId,
+          rapat_id: meetingId,
+        },
       },
     });
     if (panitiaRapat) {
-      throw new BadRequestException('Already absen');
+      throw new BadRequestException('Panitia already attended the meeting');
     }
 
     await this.prismaService.panitiaRapatBPH.create({
@@ -208,7 +230,7 @@ export class MeetingsService {
     return 'Success';
   }
 
-  async deleteAttendance(
+  async removeAttendee(
     divisionId: string,
     meetingId: string,
     username: string,
@@ -216,6 +238,19 @@ export class MeetingsService {
     this.logger.log('Delete absen meeting', 'MeetingsService');
 
     await this.getMeeting(divisionId, meetingId);
+
+    const panitiaRapat = await this.prismaService.panitiaRapatBPH.findUnique({
+      where: {
+        panitia_username_divisi_bph_id_rapat_id: {
+          panitia_username: username,
+          divisi_bph_id: divisionId,
+          rapat_id: meetingId,
+        },
+      },
+    });
+    if (!panitiaRapat) {
+      throw new BadRequestException('Panitia has not attended the meeting');
+    }
 
     await this.prismaService.panitiaRapatBPH.delete({
       where: {

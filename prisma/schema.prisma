@@ -140,6 +140,7 @@ model Mentee {
 model Mentoring {
   @@map("mentoring")
 
+  id              String        @default(uuid())
   waktu           DateTime      @db.Timestamp()
   tempat          String        @db.VarChar(255)
   materi          String        @db.Text
@@ -148,21 +149,22 @@ model Mentoring {
 
   kelompok_okk     KelompokOKK   @relation(fields: [no_kelompok], references: [no], onDelete: Cascade, onUpdate: Cascade)
 
-  @@id([no_kelompok, waktu])
+  @@id([no_kelompok, id])
 }
 
 model MenteeMentoring {
   @@map("mentee_mentoring")
 
+  mentoring_id     String   @db.VarChar(100)
   mentee_username  String   @db.VarChar(100)
   waktu_hadir      DateTime @db.Timestamp()
   waktu_mentoring  DateTime @db.Timestamp()
   no_kelompok      Int
 
   mentee        Mentee    @relation(fields: [mentee_username], references: [username], onDelete: Cascade, onUpdate: Cascade)
-  mentoring     Mentoring @relation(fields: [waktu_mentoring, no_kelompok], references: [waktu, no_kelompok], onDelete: Cascade, onUpdate: Cascade)
+  mentoring     Mentoring @relation(fields: [mentoring_id, no_kelompok], references: [id, no_kelompok], onDelete: Cascade, onUpdate: Cascade)
 
-  @@id([mentee_username, waktu_mentoring, no_kelompok])
+  @@id([mentee_username, mentoring_id, no_kelompok])
 }
 
 model Acara {
