@@ -12,7 +12,8 @@ export class ErrorFilter implements ExceptionFilter {
   catch(exception: HttpException, host: ArgumentsHost) {
     const response = host.switchToHttp().getResponse();
     const responseBody = exception.getResponse();
-    const errorMessage = responseBody['message'] || responseBody['error'];
+    const errorMessage =
+      responseBody['message'] || responseBody['error'] || exception.message;
 
     this.logger.warn(errorMessage, 'ErrorFilter');
 

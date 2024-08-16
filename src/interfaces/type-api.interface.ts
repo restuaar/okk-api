@@ -111,6 +111,8 @@ export class MenteeType implements Mentee {
 
 export class MentoringType implements Mentoring {
   @ApiProperty()
+  id: string;
+  @ApiProperty()
   waktu: Date;
   @ApiProperty()
   tempat: string;
@@ -121,6 +123,8 @@ export class MentoringType implements Mentoring {
 }
 
 export class MenteeMentoringType implements MenteeMentoring {
+  @ApiProperty()
+  mentoring_id: string;
   @ApiProperty()
   mentee_username: string;
   @ApiProperty()

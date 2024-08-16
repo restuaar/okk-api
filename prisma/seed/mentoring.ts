@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { MENTORING_PER_KELOMPOK } from './utils/constant';
+import { v6 as uuidv6 } from 'uuid';
 import {
   getRandomMateri,
   getRandomTempat,
@@ -23,6 +24,7 @@ async function main() {
     Array.from({ length: MENTORING_PER_KELOMPOK }).map(() => {
       const waktu = getRandomWaktu();
       return {
+        id: uuidv6(),
         waktu,
         tempat: getRandomTempat(),
         materi: getRandomMateri(),
@@ -45,6 +47,7 @@ async function main() {
         });
 
         return mentees.map((mentee) => ({
+          mentoring_id: mentoring.id,
           mentee_username: mentee.username,
           waktu_hadir: getRandomWaktu(mentoring.waktu),
           waktu_mentoring: mentoring.waktu,
