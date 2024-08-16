@@ -107,6 +107,7 @@ export class OrganizersService {
     this.logger.log('Create organizer', 'OrganizersService');
 
     this.validateInput(createOrganizerDto, false);
+    this.checkAkun(createOrganizerDto.username);
 
     return await this.prismaService.panitia.create({
       data: createOrganizerDto,
@@ -182,6 +183,16 @@ export class OrganizersService {
     }
 
     return organizer;
+  }
+
+  async checkAkun(username: string) {
+    const akun = await this.prismaService.akun.findUnique({
+      where: { username },
+    });
+
+    if (!akun) {
+      throw new NotFoundException('Akun not found');
+    }
   }
 
   validateInput(

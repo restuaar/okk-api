@@ -14,6 +14,7 @@ import { GroupsModule } from './groups/groups.module';
 import { MenteesModule } from './mentees/mentees.module';
 import { MentoringsModule } from './mentorings/mentorings.module';
 import { EventsModule } from './events/events.module';
+import { SponsorsModule } from './sponsors/sponsors.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { EventsModule } from './events/events.module';
     MenteesModule,
     MentoringsModule,
     EventsModule,
+    SponsorsModule,
   ],
   controllers: [AppController],
 })

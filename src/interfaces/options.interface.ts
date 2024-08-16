@@ -35,3 +35,8 @@ export class EventOptions {
   includePembicara: boolean = false;
   includeSponsor: boolean = false;
 }
+
+export class SponsorOptions {
+  includeAcara: boolean = false;
+  includeAkun: boolean = false;
+}
