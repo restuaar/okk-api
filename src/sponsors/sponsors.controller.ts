@@ -107,6 +107,7 @@ export class SponsorsController {
 
   @Patch(':username')
   @Roles([Role.PENGURUS_INTI, Role.PJ, Role.SPONSOR])
+  @ApiParam({ name: 'username', type: String })
   @ApiQuery({ name: 'includeAcara', required: false, type: Boolean })
   @ApiQuery({ name: 'includeAkun', required: false, type: Boolean })
   @ApiResponse({
@@ -163,7 +164,7 @@ export class SponsorsController {
   @Roles([Role.PENGURUS_INTI, Role.PJ, Role.SPONSOR])
   @ApiResponse({
     description: 'Success assign event sponsor',
-    type: EventSponsorEntity,
+    type: EventEntity,
   })
   async addEventSponsor(@Body() createEventSponsorDto: CreateEventSponsorDto) {
     this.logger.log('Assign event sponsor', 'SponsorsController');
@@ -223,7 +224,7 @@ export class SponsorsController {
   @ApiParam({ name: 'id_sponsor', required: true, type: String })
   @ApiResponse({
     description: 'Success unassign event sponsor',
-    type: SponsorEntity,
+    type: EventSponsorEntity,
   })
   async deleteEventSponsor(
     @Param('id_acara') id_acara: string,

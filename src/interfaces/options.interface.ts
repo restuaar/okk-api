@@ -40,3 +40,8 @@ export class SponsorOptions {
   includeAcara: boolean = false;
   includeAkun: boolean = false;
 }
+
+export class SpeakerOptions {
+  includeAcara: boolean = false;
+  includeAkun: boolean = false;
+}

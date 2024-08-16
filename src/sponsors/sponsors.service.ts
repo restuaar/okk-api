@@ -50,7 +50,7 @@ export class SponsorsService {
   async createSponsor(data: CreateSponsorDto) {
     this.logger.log('Create sponsor', 'SponsorsService');
 
-    this.checkAkun(data.username);
+    await this.checkAkun(data.username);
 
     return this.prismaService.sponsor.create({
       data,
