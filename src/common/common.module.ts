@@ -2,8 +2,9 @@ import { Global, Module } from '@nestjs/common';
 import { LoggerModule } from './logger/logger.module';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './database/database.module';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { CacheInterceptor, CacheModule } from '@nestjs/cache-manager';
 
 @Global()
 @Module({
@@ -16,15 +17,24 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
     ThrottlerModule.forRoot([
       {
         ttl: 6000,
-        limit: 2,
+        limit: 10,
       },
     ]),
+    CacheModule.register({
+      ttl: 5 * 1000,
+      max: 100,
+      isGlobal: true,
+    }),
   ],
   exports: [LoggerModule, DatabaseModule],
   providers: [
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: CacheInterceptor,
     },
   ],
 })

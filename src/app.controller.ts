@@ -1,8 +1,10 @@
-import { Controller, Get } from '@nestjs/common';
+import { CacheInterceptor } from '@nestjs/cache-manager';
+import { Controller, Get, UseInterceptors } from '@nestjs/common';
 import { ApiExcludeController } from '@nestjs/swagger';
 
 @Controller()
 @ApiExcludeController()
+@UseInterceptors(CacheInterceptor)
 export class AppController {
   @Get()
   main() {

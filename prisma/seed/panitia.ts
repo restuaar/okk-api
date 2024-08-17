@@ -19,13 +19,13 @@ async function main() {
     where: {
       AND: AKUN_KOSONG,
     },
-    take: divisiPI.length,
+    take: divisiPI.length - 1,
   });
 
   const panitiaPIRecords = dataAkunPI.map((akun, index) => {
     const dataRandom = getRandomFakultasJurusanAngkatan();
     return {
-      username: akun.username,
+      username: index === 0 ? 'restuaar' : akun.username,
       fakultas: dataRandom.fakultas,
       jurusan: dataRandom.jurusan,
       angkatan: dataRandom.angkatan,
