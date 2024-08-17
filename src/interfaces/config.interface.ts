@@ -18,6 +18,11 @@ interface CookieConfig {
   secret: string;
 }
 
+interface RedisConfig {
+  host: string;
+  port: number;
+}
+
 export interface ConfigProps {
   port: number;
   env: string;
@@ -25,4 +30,5 @@ export interface ConfigProps {
   swagger: SwaggerConfig;
   jwt: JwtConfig;
   cookies: CookieConfig;
+  redis: RedisConfig;
 }
