@@ -2,7 +2,9 @@ services:
   postgres:
     image: postgres:latest
     restart: always
-    container_name: PostgresOKK
+    container_name: postgres-okk
+    networks:
+      - network-okk
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=admin
@@ -10,7 +12,31 @@ services:
     volumes:
       - postgres:/var/lib/postgresql/data
     ports:
-      - '5432:5432'
+      - '5433:5432'
+
+  adminer:
+    image: adminer:latest
+    restart: always
+    container_name: adminer-okk
+    networks:
+      - network-okk
+    depends_on:
+      - postgres
+    ports:
+      - '8080:8080'
+  
+  redis:
+    image: redis:latest
+    restart: always
+    container_name: redis-okk
+    networks:
+      - network-okk
+    ports:
+      - '6379:6379'
+
+networks:
+  network-okk:
+    driver: bridge
 
 volumes:
   postgres:
