@@ -1,7 +1,7 @@
 services:
   postgres:
     image: postgres:latest
-    restart: unless-stopped
+    restart: always
     container_name: postgres-okk
     networks:
       - network-okk
@@ -9,41 +9,53 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=admin
       - POSTGRES_DB=okk-api
+    volumes:
+      - postgres:/var/lib/postgresql/data
     ports:
       - '5433:5432'
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
 
-  pgadmin:
-    container_name: pgadmin
-    image: dpage/pgadmin4
+  adminer:
+    image: adminer:latest
     restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@pgadmin.com
-      PGADMIN_DEFAULT_PASSWORD: admin
+    container_name: adminer-okk
     networks:
-      - backend_network
-    ports:
-      - '5050:80'
+      - network-okk
     depends_on:
       - postgres
+    ports:
+      - '8080:8080'
 
   redis:
     image: redis:latest
-    restart: unless-stopped
+    restart: always
     container_name: redis-okk
-    environment:
-      - REDIS_PORT=6379
     networks:
       - network-okk
     ports:
       - '6379:6379'
+    volumes:
+      - redis:/data
+
+  nestjs-okk:
+    image: restuaar/okk-api:latest
+    restart: always
+    container_name: okk-api
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - network-okk
+    ports:
+      - '3000:3000'
+    env_file:
+      - .env
 
 networks:
   network-okk:
     driver: bridge
 
 volumes:
-  postgres_data: {}
+  postgres:
+    driver: local
   redis:
     driver: local

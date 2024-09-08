@@ -6,4 +6,4 @@ Dockerfile
 .prettierrc
 .gitignore
 .eslintrc.js
-README.md
+*.md
